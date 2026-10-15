@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>おつとめ役割表</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0OCIgZmlsbD0iI2Y2ZjFlNiIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQ2IiBmaWxsPSJub25lIiBzdHJva2U9IiNiNTQ4MmUiIHN0cm9rZS13aWR0aD0iMi41Ii8+PGc+PGNpcmNsZSBjeD0iNTAuMCIgY3k9IjI1LjUiIHI9IjE3LjUiIGZpbGw9IiNiNTQ4MmUiLz48Y2lyY2xlIGN4PSI3My4zIiBjeT0iNDIuNDMiIHI9IjE3LjUiIGZpbGw9IiNiNTQ4MmUiLz48Y2lyY2xlIGN4PSI2NC40IiBjeT0iNjkuODIiIHI9IjE3LjUiIGZpbGw9IiNiNTQ4MmUiLz48Y2lyY2xlIGN4PSIzNS42IiBjeT0iNjkuODIiIHI9IjE3LjUiIGZpbGw9IiNiNTQ4MmUiLz48Y2lyY2xlIGN4PSIyNi43IiBjeT0iNDIuNDMiIHI9IjE3LjUiIGZpbGw9IiNiNTQ4MmUiLz48L2c+PC9zdmc+" />
+<style>
+  :root {
+    --ink: #2b2822;
+    --paper: #f6f1e6;
+    --paper-card: #fffdf8;
+    --line: #d8cfb8;
+    --vermilion: #b5482e;
+    --vermilion-soft: #e7d6c9;
+    --gold: #a8873f;
+  }
+  * { box-sizing: border-box; }
+  html { overflow-y: scroll; } /* タブ切替でスクロールバーの有無が変わり、ボタン位置がずれるのを防ぐ */
+  body { margin: 0; }
+  .app-root {
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    padding: 28px 18px 90px;
+  }
+
+  /* ===== ヘッダー・ツールバー ===== */
+  .toolbar { max-width: 900px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .title-block { display: flex; flex-direction: column; gap: 2px; }
+  .title-eyebrow { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 11px; letter-spacing: 0.3em; color: var(--vermilion); font-weight: 600; }
+  h1.main-title { font-size: 24px; font-weight: 700; margin: 2px 0 0; letter-spacing: 0.05em; }
+  .actions { display: flex; gap: 8px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 3px; border: 1px solid var(--line); background: var(--paper-card); color: var(--ink); font-size: 13px; cursor: pointer; transition: all 0.15s ease; font-family: "Hiragino Kaku Gothic ProN", sans-serif; }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn.primary { background: var(--vermilion); border-color: var(--vermilion); color: #fff; }
+  .btn.primary:hover { background: #9c3c26; color: #fff; }
+  .btn.danger { background: var(--vermilion); border-color: var(--vermilion); color: #fff; }
+  .btn.danger:hover { background: #8f3016; }
+  .back-btn { background: transparent; }
+
+  .toast { max-width: 900px; margin: 0 auto 16px; background: var(--vermilion-soft); border-left: 3px solid var(--vermilion); padding: 8px 14px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; border-radius: 2px; display: none; }
+  .toast.show { display: block; }
+
+  .sync-status { max-width: 900px; margin: 0 auto 16px; display: flex; align-items: center; gap: 6px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12px; color: #8a7f68; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #4a7a4a; flex-shrink: 0; }
+  .sync-dot.saving { background: var(--gold); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--vermilion); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ===== タブ ===== */
+  /* Excelのシート見出し風：非選択は沈ませ、選択中は下の内容とつながって見せる */
+  .tab-bar { max-width: 900px; margin: 0 auto 20px; display: flex; gap: 2px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; border-bottom: 1px solid #b9ad92; padding-left: 6px; }
+  .tab-btn { min-width: 110px; text-align: center; padding: 8px 20px; font-size: 13px; font-weight: 700; color: #6f654f; background: #e6dcc6; border: 1px solid #b9ad92; border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; margin-top: 4px; position: relative; }
+  .tab-btn:hover { background: #efe7d4; color: var(--ink); }
+  .tab-btn.active { color: var(--vermilion); background: var(--paper); border-top: 3px solid var(--vermilion); margin-top: 0; margin-bottom: -1px; padding-top: 10px; padding-bottom: 9px; z-index: 1; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===== 祭儀式 ===== */
+  .ceremony-block { background: var(--paper-card); border: 1px solid var(--line); border-radius: 4px; padding: 14px 18px 18px; margin-bottom: 14px; }
+  .ceremony-block-title { font-size: 15px; font-weight: 700; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); font-family: "Hiragino Kaku Gothic ProN", sans-serif; display: flex; align-items: center; justify-content: space-between; }
+  .ceremony-rows { display: flex; flex-direction: column; gap: 6px; }
+  .ceremony-row { display: flex; align-items: center; gap: 8px; background: #fbf8f0; border: 1px solid var(--line); border-radius: 3px; padding: 7px 10px; }
+  .ceremony-row .person-input { flex: 1; }
+  .add-row-btn { align-self: flex-start; margin-top: 4px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12px; border: 1px dashed var(--gold); background: transparent; color: var(--gold); border-radius: 3px; padding: 5px 10px; cursor: pointer; }
+  .add-row-btn:hover { background: var(--vermilion-soft); border-color: var(--vermilion); color: var(--vermilion); }
+  .remove-row-btn { border: none; background: transparent; color: #b7ac91; cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 4px; flex-shrink: 0; }
+  .remove-row-btn:hover { color: var(--vermilion); }
+
+  /* ===== 各係員 ===== */
+  .staff-card { background: var(--paper-card); border: 1px solid var(--line); border-radius: 4px; padding: 14px 18px 18px; margin-bottom: 14px; }
+  .staff-card-title { font-size: 15px; font-weight: 700; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); font-family: "Hiragino Kaku Gothic ProN", sans-serif; }
+  .staff-note-label { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12px; font-weight: 700; color: var(--gold); margin: 12px 0 6px; }
+  .staff-note-textarea { width: 100%; min-height: 60px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: #fbf8f0; resize: vertical; }
+  .staff-note-textarea:focus { outline: none; border-color: var(--vermilion); background: #fff; }
+
+  /* ===== 資料タブ ===== */
+  .files-section-title { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 14px; font-weight: 700; margin: 6px 0 8px; padding-left: 8px; border-left: 3px solid var(--vermilion); }
+  .materials-form { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .materials-form .group-name-input { flex: 1 1 180px; min-width: 0; }
+  .material-link { color: var(--vermilion); font-weight: 700; text-decoration: none; word-break: break-all; }
+  .material-link:hover { text-decoration: underline; }
+  .files-toolbar { margin-bottom: 8px; }
+  .files-desc { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12px; color: #8a7f68; margin-bottom: 16px; line-height: 1.6; }
+  .files-empty { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; color: #b7ac91; text-align: center; padding: 30px 0; }
+  .file-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .file-card-icon { font-size: 20px; flex-shrink: 0; }
+  .file-card-info { flex: 1; min-width: 0; }
+  .file-card-name { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-card-meta { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 11px; color: #b7ac91; margin-top: 2px; }
+  .file-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .file-card-btn {
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .file-card-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .file-card-btn.danger:hover { border-color: var(--vermilion); color: var(--vermilion); }
+
+
+  /* ===== グループ・演目 ===== */
+  .content-wrap { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 34px; }
+
+  .group-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--vermilion); padding-bottom: 8px; }
+  .group-tag { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 10px; letter-spacing: 0.15em; color: var(--vermilion); font-weight: 700; background: var(--vermilion-soft); padding: 2px 7px; border-radius: 2px; }
+  .group-title { font-size: 19px; font-weight: 700; margin: 0; letter-spacing: 0.03em; }
+
+  .perf-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .perf-card { background: var(--paper-card); border: 1px solid var(--line); border-radius: 4px; padding: 14px 18px 18px; box-shadow: 0 1px 3px rgba(43,40,34,0.05); }
+  .perf-title { font-size: 16px; font-weight: 700; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); color: var(--ink); }
+
+  .roles-wrap { display: flex; flex-direction: column; gap: 7px; }
+
+  .role-row { display: flex; align-items: center; gap: 10px; background: #fbf8f0; border: 1px solid var(--line); border-radius: 3px; padding: 7px 10px; }
+  .role-row.multi { flex-direction: column; align-items: stretch; }
+  .role-label { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12.5px; font-weight: 700; color: var(--gold); min-width: 62px; }
+  .role-row.multi .role-label { margin-bottom: 6px; }
+
+  .person-input { border: none; border-bottom: 1px solid var(--line); background: transparent; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; padding: 4px 4px; color: var(--ink); flex: 1; min-width: 0; }
+  .person-input:focus { outline: none; border-bottom: 1px solid var(--vermilion); background: #fff; }
+
+  .perf-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+  .perf-head .perf-title { margin: 0; padding: 0; border: none; }
+  .copy-prev-btn { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 12px; padding: 5px 12px; border: 1px dashed var(--gold); border-radius: 12px; background: transparent; color: var(--gold); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .copy-prev-btn:hover { background: var(--vermilion-soft); border-color: var(--vermilion); color: var(--vermilion); }
+  .person-fields { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; flex-wrap: wrap; }
+  .person-fields .name-input { flex: 1 1 88px; min-width: 70px; }
+  .person-fields .furigana-input { flex: 1 1 70px; min-width: 56px; font-size: 11px; color: #8a7f68; }
+  .chair-toggle-btn {
+    flex: 0 0 auto;
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: #8a7f68;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .chair-toggle-btn.on {
+    background: var(--vermilion);
+    border-color: var(--vermilion);
+    color: #fff;
+  }
+
+  .otefuri-rows { display: flex; flex-direction: column; gap: 8px; }
+  .otefuri-row { display: flex; align-items: center; gap: 8px; }
+  .otefuri-row-label { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 11px; font-weight: 700; color: var(--vermilion); min-width: 18px; text-align: center; }
+  .otefuri-row .multi-grid { flex: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .multi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .multi-cell { display: flex; flex-direction: column; gap: 3px; background: #fff; border: 1px solid var(--line); border-radius: 3px; padding: 6px 5px; min-width: 0; }
+  .multi-cell.shin { border-color: var(--vermilion); background: var(--vermilion-soft); }
+  .multi-cell-label { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 10.5px; color: var(--ink); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1.3; }
+  .shin-badge { font-size: 9px; background: var(--vermilion); color: #fff; padding: 1px 5px; border-radius: 8px; font-weight: 700; white-space: nowrap; align-self: flex-start; }
+  .multi-cell .person-input { border-bottom: 1px solid var(--line); font-size: 12px; padding: 4px 2px; width: 100%; min-width: 0; }
+  .multi-cell .person-fields { flex-direction: column; align-items: stretch; gap: 4px; }
+  .multi-cell .person-fields .name-input,
+  .multi-cell .person-fields .furigana-input { flex: none; width: 100%; }
+  .multi-cell .chair-toggle-btn { width: 100%; text-align: center; }
+
+  @media (max-width: 380px) { .otefuri-row-label { font-size: 10px; } }
+  @media (max-width: 480px) {
+    .app-root { padding: 18px 10px 70px; }
+    .perf-card { padding: 12px 12px 14px; }
+    h1.main-title { font-size: 20px; }
+    .group-title { font-size: 16px; }
+    .perf-title { font-size: 14px; }
+    .role-row { padding: 6px 8px; }
+    .role-label { min-width: 54px; font-size: 12px; }
+    .person-input { font-size: 13px; }
+  }
+
+  /* ===== 設定画面 ===== */
+  .settings-root { max-width: 700px; margin: 0 auto; display: none; }
+  .settings-root.show { display: block; }
+  .settings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+  .settings-title { font-size: 20px; display: flex; align-items: center; gap: 8px; margin: 0; }
+  .settings-block { background: var(--paper-card); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; margin-bottom: 16px; }
+  .settings-block-title { font-size: 15px; font-weight: 700; margin: 0 0 8px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; display: flex; align-items: center; gap: 6px; }
+  .settings-desc { font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; color: #6b6455; margin: 0 0 12px; line-height: 1.6; }
+  .danger-block { border-color: var(--vermilion); }
+  .danger-text { color: var(--vermilion); }
+  .confirm-box { margin-top: 10px; background: var(--vermilion-soft); border-left: 3px solid var(--vermilion); padding: 12px 14px; border-radius: 3px; font-family: "Hiragino Kaku Gothic ProN", sans-serif; display: none; }
+  .confirm-box.show { display: block; }
+  .confirm-box p { margin: 0 0 10px; font-size: 13px; }
+  .confirm-actions { display: flex; gap: 8px; }
+
+  .group-name-edit-list { display: flex; flex-direction: column; gap: 8px; }
+  .group-name-input { width: 100%; font-family: "Hiragino Kaku Gothic ProN", sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
+
+  .group-break-perf {
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    background: #fbf8f0;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+  .group-break-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0;
+  }
+  .group-break-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 11px;
+    color: #8a7f68;
+    cursor: pointer;
+  }
+  .group-break-toggle-label input { cursor: pointer; }
+  .group-break-toggle-label.on { color: var(--vermilion); font-weight: 700; }
+  .group-name-input:focus { outline: none; border-color: var(--vermilion); }
+
+  .main-screen { display: block; }
+  .main-screen.hide { display: none; }
+
+  @media print {
+    .toolbar, .toast { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-root">
+
+  <!-- ===== メイン画面 ===== -->
+  <div class="main-screen" id="main-screen">
+    <div class="toolbar">
+      <div class="title-block">
+        <span class="title-eyebrow">TENRIKYO OTSUTOME</span>
+        <h1 class="main-title">おつとめ役割表</h1>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="print-btn">🖨 PDF / 印刷</button>
+        <button class="btn" id="print-blank-btn">📝 聞き取り用紙（白紙）</button>
+        <button class="btn" id="settings-open-btn">⚙ 設定</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div class="sync-status" id="sync-status"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">保存済み</span></div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-btn-otsutome" data-tab="otsutome">おつとめ</button>
+      <button class="tab-btn" id="tab-btn-ceremony" data-tab="ceremony">祭儀式</button>
+      <button class="tab-btn" id="tab-btn-staff" data-tab="staff">各係員</button>
+      <button class="tab-btn" id="tab-btn-files" data-tab="files">資料</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-panel-otsutome">
+      <div class="content-wrap" id="content-wrap"></div>
+    </div>
+    <div class="tab-panel" id="tab-panel-ceremony">
+      <div class="content-wrap" id="ceremony-wrap"></div>
+    </div>
+    <div class="tab-panel" id="tab-panel-staff">
+      <div class="content-wrap" id="staff-wrap"></div>
+    </div>
+    <div class="tab-panel" id="tab-panel-files">
+      <div class="content-wrap" id="files-wrap">
+        <div class="files-section-title">共有リンク（みんなで見られます）</div>
+        <div class="files-desc">Googleドライブなどに置いた資料のリンクを登録すると、共有している全員に表示されます。</div>
+        <div class="materials-form">
+          <input class="group-name-input" id="materials-title-input" placeholder="タイトル（例：役割表PDF）" />
+          <input class="group-name-input" id="materials-url-input" placeholder="https://..." />
+          <button class="btn primary" id="materials-add-btn">＋ 追加</button>
+        </div>
+        <div id="materials-list"></div>
+        <div class="files-section-title">この端末だけの資料</div>
+        <div class="files-toolbar">
+          <button class="btn primary" id="files-add-btn">＋ ファイルを追加</button>
+          <input type="file" id="files-input" multiple style="display:none" />
+        </div>
+        <div class="files-desc">PDFや画像など、関連資料をこの端末のブラウザ内に保存しておけます。（他の端末やブラウザからは見えません）</div>
+        <div id="files-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 設定画面 ===== -->
+  <div class="settings-root" id="settings-root">
+    <div class="settings-header">
+      <button class="btn back-btn" id="settings-close-btn">← 役割表に戻る</button>
+      <h1 class="settings-title">⚙ 設定</h1>
+    </div>
+
+    <div class="settings-block">
+      <h2 class="settings-block-title">オンライン共有の接続設定</h2>
+      <p class="settings-desc">Google スプレッドシートと連携すると、複数人で同じデータを共有・追記できるようになります。接続先のURLは、管理者から共有されたものを入力してください。</p>
+      <input class="group-name-input" id="sync-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
+      <div style="height:8px"></div>
+      <button class="btn primary" id="sync-url-save-btn">接続先を保存</button>
+      <button class="btn" id="sync-fetch-btn">最新の内容を取得</button>
+      <button class="btn" id="sync-url-clear-btn">接続を解除</button>
+    </div>
+
+    <div class="settings-block">
+      <h2 class="settings-block-title">グループ編成</h2>
+      <p class="settings-desc">演目の並び順（座りづとめ〜十二下り目）は固定です。区切りたい位置のスイッチをONにしてください。全てOFFにすると「グループなし」（全演目が1つのまとまり）になります。</p>
+      <div id="group-break-list"></div>
+      <div style="height:8px"></div>
+      <button class="btn primary" id="group-break-apply-btn">グループ編成を適用</button>
+    </div>
+
+    <div class="settings-block">
+      <h2 class="settings-block-title">グループ名の編集</h2>
+      <div class="group-name-edit-list" id="group-name-edit-list"></div>
+    </div>
+
+    <div class="settings-block">
+      <h2 class="settings-block-title">データのバックアップ</h2>
+      <p class="settings-desc">現在の入力内容をファイルに保存します。定期的な保存をおすすめします。</p>
+      <button class="btn primary" id="export-btn">⬇ バックアップを保存</button>
+    </div>
+
+    <div class="settings-block">
+      <h2 class="settings-block-title">データの復元</h2>
+      <p class="settings-desc">保存済みのバックアップファイル（JSON）を読み込みます。現在の内容は上書きされます。</p>
+      <button class="btn" id="import-btn">⬆ バックアップを読み込む</button>
+      <input type="file" accept="application/json" id="import-file-input" style="display:none" />
+    </div>
+
+    <div class="settings-block danger-block">
+      <h2 class="settings-block-title danger-text">⚠ 初期化</h2>
+      <p class="settings-desc">すべての入力内容を消去し、初期状態に戻します。この操作は元に戻せません。</p>
+      <button class="btn danger" id="reset-open-btn">↺ 初期化する</button>
+      <div class="confirm-box" id="confirm-box">
+        <p>本当にすべてのデータを削除しますか？この操作は取り消せません。</p>
+        <p>確認のため、パスワードを入力してください。</p>
+        <input type="password" id="reset-password-input" class="group-name-input" placeholder="パスワード" inputmode="numeric" />
+        <div style="height:8px"></div>
+        <div class="confirm-actions">
+          <button class="btn danger" id="reset-confirm-btn">はい、初期化します</button>
+          <button class="btn" id="reset-cancel-btn">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- 固定の役割順序（編集不可） ----------
+  var ROLE_TEMPLATE = [
+    { key: "koto", label: "琴", type: "single" },
+    { key: "shamisen", label: "三味線", type: "single" },
+    { key: "kokyu", label: "胡弓", type: "single" },
+    { key: "otefuri", label: "おてふり", type: "otefuri" },
+    { key: "jikata", label: "地方", type: "jikata" },
+    { key: "kotsuzumi", label: "小鼓", type: "single" },
+    { key: "surigane", label: "すりがね", type: "single" },
+    { key: "taiko", label: "太鼓", type: "single" },
+    { key: "hyoshigi", label: "拍子木", type: "single" },
+    { key: "chanpon", label: "ちゃんぽん", type: "single" },
+    { key: "fue", label: "笛", type: "single" }
+  ];
+
+  // おてふりの立ち位置。男段・女段を縦に2段。各段は芯（中央）を基準に外側へ1,2,3。
+  var OTEFURI_ROWS = [
+    { key: "male", label: "男", positions: [
+        { key: "m3", label: "男3（外側）", isShin: false },
+        { key: "m2", label: "男2", isShin: false },
+        { key: "m1", label: "男（芯）", isShin: true }
+    ]},
+    { key: "female", label: "女", positions: [
+        { key: "f1", label: "女（芯）", isShin: true },
+        { key: "f2", label: "女2", isShin: false },
+        { key: "f3", label: "女3（外側）", isShin: false }
+    ]}
+  ];
+  var OTEFURI_POSITIONS = OTEFURI_ROWS.reduce(function (acc, row) {
+    return acc.concat(row.positions);
+  }, []);
+
+  var JIKATA_POSITIONS = [
+    { key: "j1", label: "地方（芯）", isShin: true },
+    { key: "j2", label: "地方2（外側）", isShin: false }
+  ];
+
+  function uid() {
+    return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
+
+  function makePersonEntry() {
+    return { name: "", furigana: "", chair: false };
+  }
+
+  function makeRoles() {
+    return ROLE_TEMPLATE.map(function (r) {
+      if (r.type === "otefuri") {
+        var people = {};
+        OTEFURI_POSITIONS.forEach(function (p) { people[p.key] = makePersonEntry(); });
+        return { key: r.key, label: r.label, type: r.type, id: uid(), people: people };
+      }
+      if (r.type === "jikata") {
+        var people2 = {};
+        JIKATA_POSITIONS.forEach(function (p) { people2[p.key] = makePersonEntry(); });
+        return { key: r.key, label: r.label, type: r.type, id: uid(), people: people2 };
+      }
+      return { key: r.key, label: r.label, type: r.type, id: uid(), person: makePersonEntry() };
+    });
+  }
+
+  function makePerformance(name) {
+    return { id: uid(), name: name, roles: makeRoles() };
+  }
+
+  function makeDefaultGroups() {
+    return [
+      { id: uid(), name: "座りづとめ", performances: [makePerformance("座りづとめ")] },
+      { id: uid(), name: "よろづよ〜三下り目", performances: [
+          makePerformance("よろづよ八首"), makePerformance("一下り目"),
+          makePerformance("二下り目"), makePerformance("三下り目")
+      ]},
+      { id: uid(), name: "四下り目〜六下り目", performances: [
+          makePerformance("四下り目"), makePerformance("五下り目"), makePerformance("六下り目")
+      ]},
+      { id: uid(), name: "七下り目〜九下り目", performances: [
+          makePerformance("七下り目"), makePerformance("八下り目"), makePerformance("九下り目")
+      ]},
+      { id: uid(), name: "十下り目〜十二下り目", performances: [
+          makePerformance("十下り目"), makePerformance("十一下り目"), makePerformance("十二下り目")
+      ]}
+    ];
+  }
+
+  // ---------- グループ編成（演目の並びは固定、区切り位置だけ自由に変更できる） ----------
+
+  // 現在のgroups構造から、全演目をその順序のまま1本の配列に展開する
+  function flattenPerformances(currentGroups) {
+    var all = [];
+    currentGroups.forEach(function (g) {
+      g.performances.forEach(function (p) { all.push(p); });
+    });
+    return all;
+  }
+
+  // 現在のgroups構造から、区切り位置（何番目の演目の"前"で区切るか）の配列を算出する
+  function getCurrentBreaks(currentGroups) {
+    var breaks = [];
+    var count = 0;
+    for (var i = 0; i < currentGroups.length - 1; i++) {
+      count += currentGroups[i].performances.length;
+      breaks.push(count);
+    }
+    return breaks;
+  }
+
+  // 区切り位置の配列から、新しいgroups構造を組み立てる。
+  // 演目データ（氏名等）は保持したまま、所属グループだけを変更する。
+  // breaksが空（区切りなし）の場合は、全演目が1つのグループになる（＝グループなし相当）。
+  function rebuildGroupsFromBreaks(currentGroups, breaks) {
+    var allPerfs = flattenPerformances(currentGroups);
+    var sortedBreaks = breaks.slice().sort(function (a, b) { return a - b; });
+    var newGroups = [];
+    var start = 0;
+    var groupNum = 1;
+    // 区切りが変わらない（先頭の演目と演目数が同じ）グループは、元のグループ名・IDを引き継ぐ
+    var oldByShape = {};
+    currentGroups.forEach(function (g) {
+      if (g.performances.length > 0) oldByShape[g.performances[0].id + ":" + g.performances.length] = g;
+    });
+    for (var i = 0; i <= sortedBreaks.length; i++) {
+      var end = (i < sortedBreaks.length) ? sortedBreaks[i] : allPerfs.length;
+      if (end > start) {
+        var slice = allPerfs.slice(start, end);
+        var kept = oldByShape[slice[0].id + ":" + slice.length];
+        newGroups.push({
+          id: kept ? kept.id : uid(),
+          name: kept ? kept.name : (sortedBreaks.length === 0 ? "グループなし" : (groupNum + "グループ")),
+          performances: slice
+        });
+        groupNum++;
+      }
+      start = end;
+    }
+    return newGroups;
+  }
+
+
+  var CEREMONY_ROLE_DEFS = [
+    { key: "saishu", label: "祭主", fixed: true },
+    { key: "koja", label: "扈者", fixed: false },
+    { key: "sashizukata", label: "指図方", fixed: false },
+    { key: "sansha", label: "賛者", fixed: false },
+    { key: "gagaku", label: "雅楽", fixed: false }
+  ];
+
+  function makeCeremony() {
+    var c = {};
+    CEREMONY_ROLE_DEFS.forEach(function (def) {
+      c[def.key] = [{ id: uid(), person: "" }];
+    });
+    return c;
+  }
+
+  // ---------- 各係員 ----------
+  var STAFF_DEFS = [
+    { key: "otsutome_staff", label: "おつとめ" },
+    { key: "parking", label: "駐車場" },
+    { key: "venue", label: "会場" },
+    { key: "reception", label: "受付" },
+    { key: "records", label: "記録" },
+    { key: "accounting", label: "会計" },
+    { key: "guests", label: "来賓" },
+    { key: "childcare", label: "託児" },
+    { key: "entertainment", label: "演芸" }
+  ];
+
+  function makeStaffGroups() {
+    return STAFF_DEFS.map(function (def) {
+      return { key: def.key, label: def.label, members: [{ id: uid(), person: "" }], note: "" };
+    });
+  }
+
+  // ---------- 状態 ----------
+  var groups = makeDefaultGroups();
+  var ceremony = makeCeremony();
+  var staffGroups = makeStaffGroups();
+  var materials = []; // 資料リンク [{id, title, url}]（共有先を通じてみんなで共有）
+  var materialsUnsupported = false; // 共有先が資料リンクを保存していない場合 true
+
+  // ---------- 保存（ローカル保存 + オンライン共有） ----------
+  // ローカル保存：この端末のこのブラウザ内（すぐに反映、オフラインでも動く）
+  // オンライン共有：Google Apps Script 経由でスプレッドシートに保存（複数人での共有用）
+  var STORAGE_KEY = "tenrikyo_yakuwari_data_v1";
+  var SYNC_URL_KEY = "tenrikyo_sync_url";
+  // 共有先のURL（管理者が用意したGoogleスプレッドシート連携先）。
+  // ファイルを開いた時点で共有状態になるよう、あらかじめ埋め込んである。
+  // 設定画面で個別に変更した場合は、そちらが優先される。
+  var DEFAULT_SYNC_URL = ""; // 公開版：共有先URLは埋め込まない（設定画面で各自が入力する）
+  var syncUrl = "";
+  var saveTimer = null;
+  var SAVE_DEBOUNCE_MS = 800;
+  var isFetchingFromServer = false;
+
+  function setSyncStatus(state, text) {
+    var dot = document.getElementById("sync-dot");
+    var label = document.getElementById("sync-text");
+    if (!dot || !label) return;
+    dot.className = "sync-dot" + (state ? " " + state : "");
+    label.textContent = text;
+  }
+
+  function scheduleAutoSave() {
+    if (isFetchingFromServer) return; // サーバーから取得した内容の反映時は保存しない（無駄な書き戻しを防ぐ）
+    setSyncStatus("saving", "保存中…");
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, SAVE_DEBOUNCE_MS);
+  }
+
+  function currentPayload() {
+    return { groups: groups, ceremony: ceremony, staffGroups: staffGroups, materials: materials, savedAt: new Date().toISOString() };
+  }
+
+  // ---------- 共有の整合（3者マージ） ----------
+  // 「最後に共有先と一致した時点の内容(base)」「この端末の内容(local)」「共有先の内容(server)」を比べ、
+  // この端末で変更した項目だけを共有先の内容に重ねる。互いに別の項目を編集していれば両方残る。
+  // 同じ項目を両方が変更した場合のみ、この端末の内容が勝つ（後勝ち）。
+  var BASE_KEY = "tenrikyo_yakuwari_base_v1";
+  var PREV_BACKUP_KEY = "tenrikyo_yakuwari_prev_v1"; // 上書きされる側の内容の退避先
+  var forceOverwriteNext = false; // 初期化・バックアップ復元の直後は、共有先を丸ごと置き換える
+  var syncInFlight = false;
+  var syncAgain = false;
+
+  function cloneJson(o) { return JSON.parse(JSON.stringify(o)); }
+
+  function currentSnapshot() {
+    return { groups: groups, ceremony: ceremony, staffGroups: staffGroups, materials: materials };
+  }
+
+  function snapshotString(s) {
+    return JSON.stringify({ groups: s.groups, ceremony: s.ceremony, staffGroups: s.staffGroups, materials: s.materials });
+  }
+
+  function normalizePersonItems(list) {
+    var out = (Array.isArray(list) ? list : []).map(function (item) {
+      if (item && typeof item === "object") {
+        return { id: item.id || uid(), person: typeof item.person === "string" ? item.person : "" };
+      }
+      return { id: uid(), person: typeof item === "string" ? item : "" };
+    });
+    if (out.length === 0) out.push({ id: uid(), person: "" });
+    return out;
+  }
+
+  // 祭儀式：欠けている項目は初期値で補い、入力済みの内容はそのまま残す
+  function normalizeCeremony(c) {
+    var out = makeCeremony();
+    if (c && typeof c === "object") {
+      Object.keys(c).forEach(function (k) {
+        if (Array.isArray(c[k])) out[k] = normalizePersonItems(c[k]);
+      });
+    }
+    return out;
+  }
+
+  // 各係員：定義済みの係を順に揃え、定義にない係が入っていても消さずに末尾へ残す
+  function normalizeStaffGroups(list) {
+    var src = Array.isArray(list) ? list : [];
+    function toStaff(item, label) {
+      return {
+        key: item.key,
+        label: typeof item.label === "string" && item.label ? item.label : label,
+        members: normalizePersonItems(item.members),
+        note: typeof item.note === "string" ? item.note : ""
+      };
+    }
+    var out = STAFF_DEFS.map(function (def) {
+      var found = src.filter(function (s) { return s && s.key === def.key; })[0];
+      return found ? toStaff(found, def.label) : { key: def.key, label: def.label, members: [{ id: uid(), person: "" }], note: "" };
+    });
+    src.forEach(function (s) {
+      if (!s || !s.key) return;
+      var known = STAFF_DEFS.filter(function (d) { return d.key === s.key; }).length > 0;
+      if (!known) out.push(toStaff(s, s.key));
+    });
+    return out;
+  }
+
+  // 資料リンク：形式が不正な項目だけ取り除く（http/https のURLのみ）
+  function normalizeMaterials(list) {
+    var out = [];
+    (Array.isArray(list) ? list : []).forEach(function (m) {
+      if (!m || typeof m.url !== "string") return;
+      var u = m.url.trim();
+      var lower = u.toLowerCase();
+      if (lower.indexOf("http://") !== 0 && lower.indexOf("https://") !== 0) return;
+      out.push({
+        id: m.id || uid(),
+        title: typeof m.title === "string" && m.title.trim() ? m.title : u,
+        url: u
+      });
+    });
+    return out;
+  }
+
+  function normalizeSnapshot(raw) {
+    return {
+      groups: migrateGroups(Array.isArray(raw.groups) ? raw.groups : []),
+      ceremony: normalizeCeremony(raw.ceremony),
+      staffGroups: normalizeStaffGroups(raw.staffGroups),
+      materials: normalizeMaterials(raw.materials)
+    };
+  }
+
+  // 入力済みの項目があるか（初期状態かどうかの判定用）
+  function hasAnyInput(s) {
+    var found = false;
+    function chk(e) { if (e && (e.name || e.furigana || e.chair)) found = true; }
+    s.groups.forEach(function (g) {
+      g.performances.forEach(function (p) {
+        p.roles.forEach(function (r) {
+          if (r.person) chk(r.person);
+          if (r.people) Object.keys(r.people).forEach(function (k) { chk(r.people[k]); });
+        });
+      });
+    });
+    Object.keys(s.ceremony).forEach(function (k) {
+      s.ceremony[k].forEach(function (i) { if (i.person) found = true; });
+    });
+    if (s.materials && s.materials.length > 0) found = true;
+    s.staffGroups.forEach(function (st) {
+      if (st.note) found = true;
+      st.members.forEach(function (i) { if (i.person) found = true; });
+    });
+    return found;
+  }
+
+  // 項目ごとの値に分解する（マージの単位）
+  function flattenSnapshot(s) {
+    var m = {};
+    s.groups.forEach(function (g) {
+      g.performances.forEach(function (p) {
+        p.roles.forEach(function (r) {
+          if (r.people) {
+            Object.keys(r.people).forEach(function (k) {
+              m["P|" + p.id + "|" + r.key + "|" + k] = JSON.stringify(r.people[k]);
+            });
+          } else {
+            m["P|" + p.id + "|" + r.key + "|"] = JSON.stringify(r.person);
+          }
+        });
+      });
+    });
+    m["G"] = JSON.stringify(s.groups.map(function (g) {
+      return { id: g.id, name: g.name, perfs: g.performances.map(function (p) { return p.id; }) };
+    }));
+    Object.keys(s.ceremony).forEach(function (k) { m["C|" + k] = JSON.stringify(s.ceremony[k]); });
+    s.staffGroups.forEach(function (st) {
+      m["SM|" + st.key] = JSON.stringify(st.members);
+      m["SN|" + st.key] = JSON.stringify(st.note);
+    });
+    (s.materials || []).forEach(function (mt) { m["M|" + mt.id] = JSON.stringify(mt); });
+    m["MO"] = JSON.stringify((s.materials || []).map(function (mt) { return mt.id; }));
+    return m;
+  }
+
+  function mergeSnapshots(base, local, server) {
+    var result = cloneJson(server);
+    var fb = flattenSnapshot(base);
+    var fl = flattenSnapshot(local);
+    var perfById = {};
+    result.groups.forEach(function (g) {
+      g.performances.forEach(function (p) { perfById[p.id] = p; });
+    });
+    var layoutChanged = false;
+    Object.keys(fl).forEach(function (key) {
+      if (fl[key] === fb[key]) return; // この端末で変更していない項目は共有先の内容を採用
+      var parts = key.split("|");
+      var val = JSON.parse(fl[key]);
+      if (parts[0] === "P") {
+        var perf = perfById[parts[1]];
+        if (!perf) return;
+        var role = perf.roles.filter(function (r) { return r.key === parts[2]; })[0];
+        if (!role) return;
+        if (parts[3]) { if (role.people) role.people[parts[3]] = val; }
+        else role.person = val;
+      } else if (parts[0] === "C") {
+        result.ceremony[parts[1]] = val;
+      } else if (parts[0] === "SM" || parts[0] === "SN") {
+        var st = result.staffGroups.filter(function (s) { return s.key === parts[1]; })[0];
+        if (!st) return;
+        if (parts[0] === "SM") st.members = val; else st.note = val;
+      } else if (parts[0] === "M") {
+        var mi = -1;
+        result.materials.forEach(function (mt, i) { if (mt.id === parts[1]) mi = i; });
+        if (mi >= 0) result.materials[mi] = val; else result.materials.push(val);
+      } else if (key === "G") {
+        layoutChanged = true;
+      }
+    });
+    // 資料リンク：この端末で削除したものを取り除き、並び順の変更を反映する
+    Object.keys(fb).forEach(function (key) {
+      if (key.indexOf("M|") === 0 && fl[key] === undefined) {
+        var delId = key.slice(2);
+        result.materials = result.materials.filter(function (mt) { return mt.id !== delId; });
+      }
+    });
+    if (fl["MO"] !== fb["MO"]) {
+      var rank = {};
+      JSON.parse(fl["MO"]).forEach(function (id, i) { rank[id] = i; });
+      result.materials = result.materials
+        .map(function (mt, i) { return { mt: mt, i: i }; })
+        .sort(function (a, b) {
+          var ra = rank[a.mt.id], rb = rank[b.mt.id];
+          if (ra === undefined && rb === undefined) return a.i - b.i;
+          if (ra === undefined) return 1;
+          if (rb === undefined) return -1;
+          return ra - rb;
+        })
+        .map(function (x) { return x.mt; });
+    }
+    if (layoutChanged) {
+      // グループ編成・グループ名をこの端末の内容にそろえる（演目の中身は上でマージ済みのものを使う）
+      var layout = JSON.parse(fl["G"]);
+      var used = {};
+      var newGroups = [];
+      layout.forEach(function (lg) {
+        var perfs = lg.perfs.map(function (id) { return perfById[id]; }).filter(Boolean);
+        perfs.forEach(function (p) { used[p.id] = true; });
+        if (perfs.length > 0) newGroups.push({ id: lg.id, name: lg.name, performances: perfs });
+      });
+      if (newGroups.length > 0) {
+        var rest = [];
+        result.groups.forEach(function (g) {
+          g.performances.forEach(function (p) { if (!used[p.id]) rest.push(p); });
+        });
+        rest.forEach(function (p) { newGroups[newGroups.length - 1].performances.push(p); });
+        result.groups = newGroups;
+      }
+    }
+    return result;
+  }
+
+  function loadBase() {
+    try {
+      var raw = localStorage.getItem(BASE_KEY);
+      if (!raw) return null;
+      var d = JSON.parse(raw);
+      if (d && Array.isArray(d.groups)) return normalizeSnapshot(d);
+    } catch (err) {}
+    return null;
+  }
+
+  function saveBase(str) {
+    try { localStorage.setItem(BASE_KEY, str); } catch (err) {}
+  }
+
+  // 上書きされる側の内容を、念のため端末内に1世代だけ退避する
+  function stashPrev(snapshot, reason) {
+    try {
+      localStorage.setItem(PREV_BACKUP_KEY, JSON.stringify({
+        reason: reason, stashedAt: new Date().toISOString(),
+        groups: snapshot.groups, ceremony: snapshot.ceremony, staffGroups: snapshot.staffGroups
+      }));
+    } catch (err) {}
+  }
+
+  function captureFocus() {
+    var el = document.activeElement;
+    if (!el || el === document.body || !el.getAttribute) return null;
+    var attrs = ["data-perf", "data-role", "data-field", "data-pos", "data-ceremony", "data-staff", "data-staff-note", "data-id"];
+    var sel = "";
+    attrs.forEach(function (a) {
+      var v = el.getAttribute(a);
+      if (v !== null) sel += "[" + a + "=\"" + v + "\"]";
+    });
+    if (!sel) return null;
+    var start = null, end = null;
+    try { start = el.selectionStart; end = el.selectionEnd; } catch (err) {}
+    return { tag: el.tagName.toLowerCase(), sel: sel, start: start, end: end };
+  }
+
+  function restoreFocus(f) {
+    if (!f) return;
+    var el = document.querySelector(f.tag + f.sel);
+    if (!el) return;
+    el.focus();
+    try { if (f.start !== null) el.setSelectionRange(f.start, f.end); } catch (err) {}
+  }
+
+  // 状態を差し替えて画面を再描画する（入力中の欄・スクロール位置は保つ）
+  function applySnapshot(s) {
+    var focus = captureFocus();
+    var scrollY = window.pageYOffset || 0;
+    isFetchingFromServer = true;
+    try {
+      groups = s.groups;
+      ceremony = s.ceremony;
+      staffGroups = s.staffGroups;
+      materials = s.materials || [];
+      renderMain();
+      renderCeremony();
+      renderStaff();
+      renderMaterials();
+    } finally {
+      isFetchingFromServer = false;
+    }
+    window.scrollTo(0, scrollY);
+    restoreFocus(focus);
+  }
+
+  function writeLocal() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentPayload()));
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  // ページを閉じる・隠す直前に、保留中の入力を端末内へ即時保存する
+  function flushLocalNow() {
+    if (saveTimer) writeLocal();
+  }
+
+  function doSave() {
+    saveTimer = null;
+    // まずローカルに保存（これは常に成功させる）
+    if (!writeLocal()) {
+      setSyncStatus("error", "保存に失敗しました（ブラウザのストレージを確認してください）");
+      return;
+    }
+    if (!syncUrl) {
+      setSyncStatus("", "保存済み（この端末のみ）");
+      return;
+    }
+    syncWithServer(false);
+  }
+
+  function setSharedStatus() {
+    if (materialsUnsupported) {
+      setSyncStatus("error", "共有済み（資料リンクは共有先に保存されていません。共有先の更新が必要です）");
+    } else {
+      setSyncStatus("", "共有済み");
+    }
+  }
+
+  // 共有先へ現在の内容を書き込む（成功したら、その内容を「最後に一致した時点」として記録する）
+  function pushToServer() {
+    var sentStr = snapshotString(currentSnapshot());
+    var forced = forceOverwriteNext;
+    return fetch(syncUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // Apps Script側のCORS制約を避けるためtext/plainで送る
+      body: sentStr
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          saveBase(sentStr);
+          if (forced) forceOverwriteNext = false;
+          setSharedStatus();
+        } else {
+          setSyncStatus("error", "共有に失敗しました（接続設定を確認してください）");
+        }
+      });
+  }
+
+  // 共有先の最新内容を取得し、この端末の変更とマージしてから、必要なら書き戻す
+  function syncWithServer(showLoadedToast) {
+    if (!syncUrl) return;
+    if (syncInFlight) { syncAgain = true; return; }
+    syncInFlight = true;
+    setSyncStatus("saving", "共有中…");
+
+    function finish() {
+      syncInFlight = false;
+      if (syncAgain) { syncAgain = false; syncWithServer(false); }
+    }
+    function fail() {
+      setSyncStatus("error", "共有に失敗しました（通信エラー・この端末には保存済み）");
+      finish();
+    }
+
+    if (forceOverwriteNext) {
+      // 初期化・復元直後は、共有先の内容と混ぜずに丸ごと置き換える
+      pushToServer().then(finish).catch(fail);
+      return;
+    }
+
+    fetch(syncUrl, { method: "GET" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!(data && data.ok && data.groups)) {
+          // 共有先にまだデータがない：この端末の内容を書き込む
+          return pushToServer();
+        }
+        var server = normalizeSnapshot(data);
+        var local = currentSnapshot();
+        // 共有先（GAS）が資料リンクを保存していない場合は、この端末の資料リンクを消さずに残す
+        materialsUnsupported = false;
+        if (data.materials === undefined) {
+          var lastBase = loadBase();
+          if (lastBase && lastBase.materials.length > 0) materialsUnsupported = true;
+          server.materials = cloneJson(local.materials);
+        }
+        var serverStr = snapshotString(server);
+        if (snapshotString(local) === serverStr) {
+          saveBase(serverStr);
+          setSharedStatus();
+          return;
+        }
+        var base = loadBase();
+        var merged;
+        if (base) {
+          merged = mergeSnapshots(base, local, server);
+        } else if (!hasAnyInput(local)) {
+          merged = server; // この端末は未入力なので共有先の内容をそのまま使う
+        } else {
+          // 比較の基準がない（初回）かつ両方に内容がある：どちらを使うか確認する
+          var useServer = window.confirm(
+            "共有先とこの端末で、入力内容が異なります。\n\n" +
+            "OK　　　：共有先の内容を使う（この端末の内容は端末内に退避します）\n" +
+            "キャンセル：この端末の内容を使って共有先を更新する（共有先の内容は端末内に退避します）"
+          );
+          if (useServer) { stashPrev(local, "共有先の内容に置き換える前のこの端末の内容"); merged = server; }
+          else { stashPrev(server, "この端末の内容で更新する前の共有先の内容"); merged = local; }
+        }
+        var mergedStr = snapshotString(merged);
+        if (mergedStr !== snapshotString(local)) {
+          applySnapshot(merged);
+          writeLocal();
+          if (showLoadedToast) showToast("最新の内容を取得しました");
+        } else if (showLoadedToast) {
+          showToast("すでに最新の内容です");
+        }
+        if (mergedStr === serverStr) {
+          saveBase(serverStr);
+          setSharedStatus();
+          return;
+        }
+        return pushToServer();
+      })
+      .then(finish)
+      .catch(fail);
+  }
+
+  function loadFromServer(showLoadedToast) {
+    try {
+      syncWithServer(showLoadedToast);
+    } catch (err) {
+      setSyncStatus("error", "オンライン共有に接続できません（この端末には保存済み）");
+    }
+  }
+
+  // 旧形式データ（person/peopleの値が文字列だったバージョン）を
+  // 新形式（{name, furigana, chair}）に変換する。新形式はそのまま通す。
+  function normalizeEntry(value) {
+    if (value && typeof value === "object") {
+      return {
+        name: typeof value.name === "string" ? value.name : "",
+        furigana: typeof value.furigana === "string" ? value.furigana : "",
+        chair: !!value.chair
+      };
+    }
+    // 旧形式：文字列がそのまま氏名だった
+    return { name: typeof value === "string" ? value : "", furigana: "", chair: false };
+  }
+
+  function migrateGroups(loadedGroups) {
+    return loadedGroups.map(function (g) {
+      return {
+        id: g.id || uid(),
+        name: g.name,
+        performances: (g.performances || []).map(function (perf) {
+          return {
+            id: perf.id || uid(),
+            name: perf.name,
+            roles: (perf.roles || []).map(function (role) {
+              if (role.type === "otefuri" || role.type === "jikata") {
+                var people = {};
+                Object.keys(role.people || {}).forEach(function (k) {
+                  people[k] = normalizeEntry(role.people[k]);
+                });
+                return { key: role.key, label: role.label, type: role.type, id: role.id || uid(), people: people };
+              }
+              return { key: role.key, label: role.label, type: role.type, id: role.id || uid(), person: normalizeEntry(role.person) };
+            })
+          };
+        })
+      };
+    });
+  }
+
+  function loadFromStorage() {
+    // まずローカルストレージの内容を同期的に読み込む（file:// で開いた場合でも確実に動く）
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data.groups && Array.isArray(data.groups)) groups = migrateGroups(data.groups);
+        // 項目が欠けた旧データでも画面が壊れないよう、入力済みの内容を残したまま形式をそろえる
+        if (data.ceremony) ceremony = normalizeCeremony(data.ceremony);
+        if (data.staffGroups && Array.isArray(data.staffGroups)) staffGroups = normalizeStaffGroups(data.staffGroups);
+        materials = normalizeMaterials(data.materials);
+      }
+    } catch (err) {
+      // 読み込みに失敗しても、初期状態のまま続行する（画面表示は必ず行う）
+    }
+
+    // オンライン共有の設定を確認する（ここではまだ通信しない）
+    var savedUrl = null;
+    try {
+      savedUrl = localStorage.getItem(SYNC_URL_KEY);
+    } catch (err) {
+      savedUrl = null;
+    }
+    syncUrl = (savedUrl !== null) ? savedUrl : DEFAULT_SYNC_URL;
+
+    if (syncUrl) {
+      setSyncStatus("", "保存済み（同期待ち）");
+    } else {
+      setSyncStatus("", "保存済み（この端末のみ）");
+    }
+  }
+
+  // 画面の初期表示が終わったあとに、安全にオンライン共有を試みる。
+  // 通信そのものが使えない環境（file:// で開いた場合など）でも、
+  // ここで例外が起きて画面表示側に影響しないようにする。
+  function trySyncWithServer() {
+    if (!syncUrl) return;
+    try {
+      loadFromServer(false);
+    } catch (err) {
+      setSyncStatus("error", "オンライン共有に接続できません（この端末には保存済み）");
+    }
+  }
+
+  // ---------- ユーティリティ ----------
+  function esc(s) {
+    // 正規表現を使わずに1文字ずつ置換する（配信環境によっては正規表現リテラルの
+    // 扱いに問題が起きることがあるため、より単純な書き方にしている）
+    s = String(s == null ? "" : s);
+    var out = "";
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (ch === "&") out += "&amp;";
+      else if (ch === "<") out += "&lt;";
+      else if (ch === ">") out += "&gt;";
+      else if (ch === "\"") out += "&quot;";
+      else out += ch;
+    }
+    return out;
+  }
+
+  function findPerf(perfId) {
+    for (var gi = 0; gi < groups.length; gi++) {
+      var perfs = groups[gi].performances;
+      for (var pi = 0; pi < perfs.length; pi++) {
+        if (perfs[pi].id === perfId) return perfs[pi];
+      }
+    }
+    return null;
+  }
+
+  function findRole(perf, roleId) {
+    return perf.roles.filter(function (r) { return r.id === roleId; })[0] || null;
+  }
+
+  // ---------- 画面描画 ----------
+
+  // 氏名・ふりがな・椅子ボタンをまとめた入力ブロックを生成する（single/otefuri/jikata共通）
+  function renderPersonFields(perf, role, posKey, entry) {
+    var posAttr = posKey ? ' data-pos="' + posKey + '"' : "";
+    var chairClass = entry.chair ? " on" : "";
+    var chairLabel = entry.chair ? "椅子：要" : "椅子：不要";
+    return (
+      '<div class="person-fields">' +
+      '<input class="person-input name-input" data-perf="' + perf.id + '" data-role="' + role.id + '" data-field="name"' + posAttr + ' ' +
+      'value="' + esc(entry.name) + '" placeholder="名前を入力" />' +
+      '<input class="person-input furigana-input" data-perf="' + perf.id + '" data-role="' + role.id + '" data-field="furigana"' + posAttr + ' ' +
+      'value="' + esc(entry.furigana) + '" placeholder="ふりがな" />' +
+      '<button type="button" class="chair-toggle-btn' + chairClass + '" data-perf="' + perf.id + '" data-role="' + role.id + '" data-field="chair"' + posAttr + '>' +
+      esc(chairLabel) +
+      '</button>' +
+      '</div>'
+    );
+  }
+
+  // 演目全体の並び（グループをまたいだ順序）で1つ前の演目を返す。先頭ならnull
+  function findPrevPerf(perfId) {
+    var all = flattenPerformances(groups);
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].id === perfId) return i > 0 ? all[i - 1] : null;
+    }
+    return null;
+  }
+
+  function renderRoleSingle(perf, role) {
+    return (
+      '<div class="role-row">' +
+      '<span class="role-label">' + esc(role.label) + '</span>' +
+      renderPersonFields(perf, role, null, role.person) +
+      '</div>'
+    );
+  }
+
+  function renderRoleOtefuri(perf, role) {
+    var rowsHtml = OTEFURI_ROWS.map(function (row) {
+      var cells = row.positions.map(function (p) {
+        var shinClass = p.isShin ? " shin" : "";
+        var badge = p.isShin ? '<span class="shin-badge">芯</span>' : "";
+        var entry = role.people[p.key];
+        return (
+          '<div class="multi-cell' + shinClass + '">' +
+          '<span class="multi-cell-label">' + esc(p.label) + badge + '</span>' +
+          renderPersonFields(perf, role, p.key, entry) +
+          '</div>'
+        );
+      }).join("");
+      return (
+        '<div class="otefuri-row">' +
+        '<span class="otefuri-row-label">' + esc(row.label) + '</span>' +
+        '<div class="multi-grid">' + cells + '</div>' +
+        '</div>'
+      );
+    }).join("");
+    return (
+      '<div class="role-row multi">' +
+      '<span class="role-label">' + esc(role.label) + '</span>' +
+      '<div class="otefuri-rows">' + rowsHtml + '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderRoleJikata(perf, role) {
+    var cells = JIKATA_POSITIONS.map(function (p) {
+      var shinClass = p.isShin ? " shin" : "";
+      var badge = p.isShin ? '<span class="shin-badge">芯</span>' : "";
+      var entry = role.people[p.key];
+      return (
+        '<div class="multi-cell' + shinClass + '">' +
+        '<span class="multi-cell-label">' + esc(p.label) + badge + '</span>' +
+        renderPersonFields(perf, role, p.key, entry) +
+        '</div>'
+      );
+    }).join("");
+    return (
+      '<div class="role-row multi">' +
+      '<span class="role-label">' + esc(role.label) + '</span>' +
+      '<div class="multi-grid">' + cells + '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderRole(perf, role) {
+    if (role.type === "single") return renderRoleSingle(perf, role);
+    if (role.type === "otefuri") return renderRoleOtefuri(perf, role);
+    return renderRoleJikata(perf, role);
+  }
+
+  function renderPerformance(perf) {
+    var rolesHtml = perf.roles.map(function (role) { return renderRole(perf, role); }).join("");
+    // 最初の演目には「前の下り」がないのでボタンを出さない
+    var copyBtn = findPrevPerf(perf.id)
+      ? '<button type="button" class="copy-prev-btn" data-perf="' + perf.id + '">前の下りと同じ</button>'
+      : "";
+    return (
+      '<div class="perf-card">' +
+      '<div class="perf-head"><h3 class="perf-title">' + esc(perf.name) + '</h3>' + copyBtn + '</div>' +
+      '<div class="roles-wrap">' + rolesHtml + '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderGroup(group) {
+    var perfsHtml = group.performances.map(renderPerformance).join("");
+    return (
+      '<section class="group-section">' +
+      '<div class="group-header">' +
+      '<span class="group-tag">GROUP</span>' +
+      '<h2 class="group-title">' + esc(group.name) + '</h2>' +
+      '</div>' +
+      '<div class="perf-list">' + perfsHtml + '</div>' +
+      '</section>'
+    );
+  }
+
+  function renderMain() {
+    document.getElementById("content-wrap").innerHTML = groups.map(renderGroup).join("");
+    // 入力イベントを再バインド
+    var inputs = document.querySelectorAll("#content-wrap .person-input");
+    inputs.forEach(function (input) {
+      input.addEventListener("input", onPersonInputChange);
+    });
+    var chairBtns = document.querySelectorAll("#content-wrap .chair-toggle-btn");
+    chairBtns.forEach(function (btn) {
+      btn.addEventListener("click", onChairToggleClick);
+    });
+    document.querySelectorAll("#content-wrap .copy-prev-btn").forEach(function (btn) {
+      btn.addEventListener("click", onCopyPrevClick);
+    });
+  }
+
+  // ---------- 祭儀式 描画 ----------
+  function renderCeremonyRole(def) {
+    var list = ceremony[def.key];
+    var rowsHtml = list.map(function (item, idx) {
+      var removeBtn = (!def.fixed && list.length > 1)
+        ? '<button class="remove-row-btn" data-ceremony-remove="' + def.key + '" data-id="' + item.id + '" title="削除">✕</button>'
+        : "";
+      return (
+        '<div class="ceremony-row">' +
+        '<input class="person-input" data-ceremony="' + def.key + '" data-id="' + item.id + '" ' +
+        'value="' + esc(item.person) + '" placeholder="名前を入力" />' +
+        removeBtn +
+        '</div>'
+      );
+    }).join("");
+    var addBtn = !def.fixed
+      ? '<button class="add-row-btn" data-ceremony-add="' + def.key + '">＋ ' + esc(def.label) + 'を追加</button>'
+      : "";
+    return (
+      '<div class="ceremony-block">' +
+      '<h3 class="ceremony-block-title">' + esc(def.label) + '</h3>' +
+      '<div class="ceremony-rows">' + rowsHtml + '</div>' +
+      addBtn +
+      '</div>'
+    );
+  }
+
+  function renderCeremony() {
+    var html = CEREMONY_ROLE_DEFS.map(renderCeremonyRole).join("");
+    document.getElementById("ceremony-wrap").innerHTML = html;
+
+    document.querySelectorAll("#ceremony-wrap .person-input").forEach(function (input) {
+      input.addEventListener("input", function (e) {
+        var key = e.target.getAttribute("data-ceremony");
+        var id = e.target.getAttribute("data-id");
+        var item = ceremony[key].filter(function (x) { return x.id === id; })[0];
+        if (item) item.person = e.target.value;
+        scheduleAutoSave();
+      });
+    });
+    document.querySelectorAll("#ceremony-wrap [data-ceremony-add]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var key = e.target.getAttribute("data-ceremony-add");
+        ceremony[key].push({ id: uid(), person: "" });
+        renderCeremony();
+        scheduleAutoSave();
+      });
+    });
+    document.querySelectorAll("#ceremony-wrap [data-ceremony-remove]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var key = e.target.getAttribute("data-ceremony-remove");
+        var id = e.target.getAttribute("data-id");
+        if (ceremony[key].length <= 1) return; // 最低1名は残す
+        ceremony[key] = ceremony[key].filter(function (x) { return x.id !== id; });
+        renderCeremony();
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  // ---------- 各係員 描画 ----------
+  function renderStaffCard(staff) {
+    var rowsHtml = staff.members.map(function (item) {
+      var removeBtn = staff.members.length > 1
+        ? '<button class="remove-row-btn" data-staff-remove="' + staff.key + '" data-id="' + item.id + '" title="削除">✕</button>'
+        : "";
+      return (
+        '<div class="ceremony-row">' +
+        '<input class="person-input" data-staff="' + staff.key + '" data-id="' + item.id + '" ' +
+        'value="' + esc(item.person) + '" placeholder="名前を入力" />' +
+        removeBtn +
+        '</div>'
+      );
+    }).join("");
+    return (
+      '<div class="staff-card">' +
+      '<h3 class="staff-card-title">' + esc(staff.label) + '</h3>' +
+      '<div class="ceremony-rows">' + rowsHtml + '</div>' +
+      '<button class="add-row-btn" data-staff-add="' + staff.key + '">＋ 担当者を追加</button>' +
+      '<div class="staff-note-label">備考</div>' +
+      '<textarea class="staff-note-textarea" data-staff-note="' + staff.key + '" placeholder="メモを入力">' + esc(staff.note) + '</textarea>' +
+      '</div>'
+    );
+  }
+
+  function findStaff(key) {
+    return staffGroups.filter(function (s) { return s.key === key; })[0] || null;
+  }
+
+  function renderStaff() {
+    var html = staffGroups.map(renderStaffCard).join("");
+    document.getElementById("staff-wrap").innerHTML = html;
+
+    document.querySelectorAll("#staff-wrap .person-input").forEach(function (input) {
+      input.addEventListener("input", function (e) {
+        var key = e.target.getAttribute("data-staff");
+        var id = e.target.getAttribute("data-id");
+        var staff = findStaff(key);
+        if (!staff) return;
+        var item = staff.members.filter(function (x) { return x.id === id; })[0];
+        if (item) item.person = e.target.value;
+        scheduleAutoSave();
+      });
+    });
+    document.querySelectorAll("#staff-wrap .staff-note-textarea").forEach(function (ta) {
+      ta.addEventListener("input", function (e) {
+        var key = e.target.getAttribute("data-staff-note");
+        var staff = findStaff(key);
+        if (staff) staff.note = e.target.value;
+        scheduleAutoSave();
+      });
+    });
+    document.querySelectorAll("#staff-wrap [data-staff-add]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var key = e.target.getAttribute("data-staff-add");
+        var staff = findStaff(key);
+        if (!staff) return;
+        staff.members.push({ id: uid(), person: "" });
+        renderStaff();
+        scheduleAutoSave();
+      });
+    });
+    document.querySelectorAll("#staff-wrap [data-staff-remove]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        var key = e.target.getAttribute("data-staff-remove");
+        var id = e.target.getAttribute("data-id");
+        var staff = findStaff(key);
+        if (!staff || staff.members.length <= 1) return;
+        staff.members = staff.members.filter(function (x) { return x.id !== id; });
+        renderStaff();
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  // ---------- タブ切り替え ----------
+  function switchTab(tabName) {
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
+    });
+    document.getElementById("tab-panel-otsutome").classList.toggle("active", tabName === "otsutome");
+    document.getElementById("tab-panel-ceremony").classList.toggle("active", tabName === "ceremony");
+    document.getElementById("tab-panel-staff").classList.toggle("active", tabName === "staff");
+    document.getElementById("tab-panel-files").classList.toggle("active", tabName === "files");
+    if (tabName === "files") renderFilesList();
+  }
+
+  // ---------- 資料リンク（みんなで共有） ----------
+  // Googleドライブ等に置いた資料のURLを登録する。一覧は役割表のデータと一緒に共有先へ保存される。
+  function isHttpUrl(u) {
+    var s = String(u).trim().toLowerCase();
+    return s.indexOf("http://") === 0 || s.indexOf("https://") === 0;
+  }
+
+  function renderMaterials() {
+    var listEl = document.getElementById("materials-list");
+    if (!listEl) return;
+    if (materials.length === 0) {
+      listEl.innerHTML = '<div class="files-empty">まだ共有リンクが登録されていません</div>';
+      return;
+    }
+    listEl.innerHTML = materials.map(function (m) {
+      return (
+        '<div class="file-card">' +
+        '<span class="file-card-icon">🔗</span>' +
+        '<div class="file-card-info">' +
+        '<a class="material-link" href="' + esc(m.url) + '" target="_blank" rel="noopener noreferrer">' + esc(m.title) + '</a>' +
+        '<div class="file-card-meta">' + esc(m.url) + '</div>' +
+        '</div>' +
+        '<div class="file-card-actions">' +
+        '<button class="file-card-btn danger" data-material-remove="' + esc(m.id) + '">削除</button>' +
+        '</div>' +
+        '</div>'
+      );
+    }).join("");
+    listEl.querySelectorAll("[data-material-remove]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-material-remove");
+        if (!confirm("この共有リンクを一覧から削除しますか？（共有しているみんなの画面からも消えます。リンク先の資料そのものは消えません）")) return;
+        materials = materials.filter(function (m) { return m.id !== id; });
+        renderMaterials();
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  function handleMaterialAdd() {
+    var titleEl = document.getElementById("materials-title-input");
+    var urlEl = document.getElementById("materials-url-input");
+    var url = urlEl.value.trim();
+    if (!isHttpUrl(url)) {
+      alert("リンクは https:// または http:// から始まるURLを入力してください。");
+      return;
+    }
+    var title = titleEl.value.trim() || url;
+    materials.push({ id: uid(), title: title, url: url });
+    titleEl.value = "";
+    urlEl.value = "";
+    renderMaterials();
+    scheduleAutoSave();
+    showToast("共有リンクを追加しました");
+  }
+
+  // ---------- 資料（ファイル保存） ----------
+  // ブラウザ標準のIndexedDBを使い、この端末・このブラウザ内にファイルを保存する。
+  // 他の端末や別のブラウザからは参照できない点に注意。
+  var FILES_DB_NAME = "tenrikyoFilesDB";
+  var FILES_DB_VERSION = 1;
+  var FILES_STORE_NAME = "files";
+  var filesDb = null;
+
+  function openFilesDb() {
+    return new Promise(function (resolve, reject) {
+      if (filesDb) { resolve(filesDb); return; }
+      if (!window.indexedDB) { reject(new Error("このブラウザはファイル保存に対応していません")); return; }
+      var req = indexedDB.open(FILES_DB_NAME, FILES_DB_VERSION);
+      req.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        if (!db.objectStoreNames.contains(FILES_STORE_NAME)) {
+          db.createObjectStore(FILES_STORE_NAME, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = function (e) {
+        filesDb = e.target.result;
+        resolve(filesDb);
+      };
+      req.onerror = function (e) {
+        reject(e.target.error);
+      };
+    });
+  }
+
+  function addFileRecord(record) {
+    return openFilesDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(FILES_STORE_NAME, "readwrite");
+        var store = tx.objectStore(FILES_STORE_NAME);
+        var req = store.add(record);
+        req.onsuccess = function () { resolve(); };
+        req.onerror = function (e) { reject(e.target.error); };
+      });
+    });
+  }
+
+  function getAllFileRecords() {
+    return openFilesDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(FILES_STORE_NAME, "readonly");
+        var store = tx.objectStore(FILES_STORE_NAME);
+        var req = store.getAll();
+        req.onsuccess = function (e) { resolve(e.target.result || []); };
+        req.onerror = function (e) { reject(e.target.error); };
+      });
+    });
+  }
+
+  function deleteFileRecord(id) {
+    return openFilesDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(FILES_STORE_NAME, "readwrite");
+        var store = tx.objectStore(FILES_STORE_NAME);
+        var req = store.delete(id);
+        req.onsuccess = function () { resolve(); };
+        req.onerror = function (e) { reject(e.target.error); };
+      });
+    });
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / 1024 / 1024).toFixed(1) + " MB";
+  }
+
+  function fileIconFor(type) {
+    if (type === "application/pdf") return "📄";
+    if (type.indexOf("image/") === 0) return "🖼️";
+    return "📎";
+  }
+
+  function dataUrlToBlob(dataUrl, type) {
+    var comma = dataUrl.indexOf(",");
+    var bin = atob(dataUrl.slice(comma + 1));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: type || "application/octet-stream" });
+  }
+
+  function downloadFileRecord(record, url) {
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = record.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // PDF・画像はブラウザの新しいタブで開き、それ以外（ブラウザで表示できない形式）はダウンロードする
+  function openFileRecord(record) {
+    var blob;
+    try {
+      blob = dataUrlToBlob(record.dataUrl, record.type);
+    } catch (err) {
+      alert("この資料を開けませんでした。");
+      return;
+    }
+    var url = URL.createObjectURL(blob);
+    var viewable = record.type === "application/pdf" || record.type.indexOf("image/") === 0;
+    if (viewable && window.open(url, "_blank")) {
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      return;
+    }
+    downloadFileRecord(record, url);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+  }
+
+  function renderFilesList() {
+    var listEl = document.getElementById("files-list");
+    getAllFileRecords().then(function (records) {
+      if (records.length === 0) {
+        listEl.innerHTML = '<div class="files-empty">まだ資料が保存されていません</div>';
+        return;
+      }
+      records.sort(function (a, b) { return b.uploadedAt - a.uploadedAt; });
+      listEl.innerHTML = records.map(function (r) {
+        var dateStr = new Date(r.uploadedAt).toLocaleDateString("ja-JP");
+        return (
+          '<div class="file-card">' +
+          '<span class="file-card-icon">' + fileIconFor(r.type) + '</span>' +
+          '<div class="file-card-info">' +
+          '<div class="file-card-name">' + esc(r.name) + '</div>' +
+          '<div class="file-card-meta">' + formatFileSize(r.size) + '　' + dateStr + '</div>' +
+          '</div>' +
+          '<div class="file-card-actions">' +
+          '<button class="file-card-btn" data-file-action="open" data-file-id="' + r.id + '">開く</button>' +
+          '<button class="file-card-btn danger" data-file-action="delete" data-file-id="' + r.id + '">削除</button>' +
+          '</div>' +
+          '</div>'
+        );
+      }).join("");
+
+      document.querySelectorAll('[data-file-action="open"]').forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-file-id");
+          var record = records.filter(function (r) { return r.id === id; })[0];
+          if (record) openFileRecord(record);
+        });
+      });
+      document.querySelectorAll('[data-file-action="delete"]').forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-file-id");
+          if (!confirm("この資料を削除しますか？")) return;
+          deleteFileRecord(id).then(renderFilesList);
+        });
+      });
+    }).catch(function () {
+      listEl.innerHTML = '<div class="files-empty">読み込みに失敗しました</div>';
+    });
+  }
+
+  function handleFilesSelected(fileList) {
+    var files = Array.prototype.slice.call(fileList);
+    if (files.length === 0) return;
+    var promises = files.map(function (file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          resolve({
+            id: uid(),
+            name: file.name,
+            type: file.type || "application/octet-stream",
+            size: file.size,
+            dataUrl: reader.result,
+            uploadedAt: Date.now()
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
+    Promise.all(promises).then(function (records) {
+      return Promise.all(records.map(addFileRecord));
+    }).then(function () {
+      renderFilesList();
+      showToast("資料を保存しました");
+    }).catch(function () {
+      alert("ファイルの保存に失敗しました。");
+    });
+  }
+
+  function getPersonEntry(role, posKey) {
+    if (posKey) return role.people[posKey];
+    return role.person;
+  }
+
+  function onPersonInputChange(e) {
+    var el = e.target;
+    var perfId = el.getAttribute("data-perf");
+    var roleId = el.getAttribute("data-role");
+    var field = el.getAttribute("data-field");
+    var pos = el.getAttribute("data-pos");
+    var perf = findPerf(perfId);
+    if (!perf) return;
+    var role = findRole(perf, roleId);
+    if (!role) return;
+    var entry = getPersonEntry(role, pos);
+    if (!entry) return;
+    if (field === "name") {
+      entry.name = el.value;
+    } else if (field === "furigana") {
+      entry.furigana = el.value;
+    }
+    // カーソル位置を保持したいので画面全体は再描画しない（値はstateに反映済み）
+    scheduleAutoSave();
+  }
+
+  function onChairToggleClick(e) {
+    var el = e.currentTarget;
+    var perfId = el.getAttribute("data-perf");
+    var roleId = el.getAttribute("data-role");
+    var pos = el.getAttribute("data-pos");
+    var perf = findPerf(perfId);
+    if (!perf) return;
+    var role = findRole(perf, roleId);
+    if (!role) return;
+    var entry = getPersonEntry(role, pos);
+    if (!entry) return;
+    entry.chair = !entry.chair;
+    el.classList.toggle("on", entry.chair);
+    el.textContent = entry.chair ? "椅子：要" : "椅子：不要";
+    scheduleAutoSave();
+  }
+
+  // 前の下り（1つ前の演目）の全役割の人（名前・ふりがな・椅子）を、そのままこの演目にコピーする。
+  // コピー後は各欄を個別に書き換えられる（通常の入力と同じ）。
+  function onCopyPrevClick(e) {
+    var perf = findPerf(e.currentTarget.getAttribute("data-perf"));
+    if (!perf) return;
+    var prev = findPrevPerf(perf.id);
+    if (!prev) return;
+
+    // [コピー先, コピー元] の組を作る（役割はkeyで対応づける）
+    var pairs = [];
+    perf.roles.forEach(function (role) {
+      var prevRole = prev.roles.filter(function (r) { return r.key === role.key; })[0];
+      if (!prevRole) return;
+      if (role.person && prevRole.person) {
+        pairs.push([role.person, prevRole.person]);
+      } else if (role.people && prevRole.people) {
+        Object.keys(role.people).forEach(function (k) {
+          if (prevRole.people[k]) pairs.push([role.people[k], prevRole.people[k]]);
+        });
+      }
+    });
+
+    // すでに入力があり、内容が変わる場合は確認する（入力済みデータを黙って消さない）
+    var willOverwrite = pairs.some(function (p) {
+      var cur = p[0], src = p[1];
+      var hasCur = cur.name || cur.furigana || cur.chair;
+      var differs = cur.name !== src.name || cur.furigana !== src.furigana || !!cur.chair !== !!src.chair;
+      return hasCur && differs;
+    });
+    if (willOverwrite && !window.confirm("この演目にすでに入力されている内容を、前の下りと同じ内容で上書きします。よろしいですか？")) return;
+
+    pairs.forEach(function (p) {
+      p[0].name = p[1].name;
+      p[0].furigana = p[1].furigana;
+      p[0].chair = !!p[1].chair;
+    });
+
+    // 画面全体は再描画せず、この演目の入力欄だけを更新する
+    var fields = document.querySelectorAll("#content-wrap [data-perf=\"" + perf.id + "\"][data-field]");
+    fields.forEach(function (f) {
+      var role = findRole(perf, f.getAttribute("data-role"));
+      if (!role) return;
+      var entry = getPersonEntry(role, f.getAttribute("data-pos"));
+      if (!entry) return;
+      var field = f.getAttribute("data-field");
+      if (field === "name") f.value = entry.name;
+      else if (field === "furigana") f.value = entry.furigana;
+      else if (field === "chair") {
+        f.classList.toggle("on", entry.chair);
+        f.textContent = entry.chair ? "椅子：要" : "椅子：不要";
+      }
+    });
+    scheduleAutoSave();
+  }
+
+  // ---------- 設定画面 ----------
+  function renderSettingsGroupNames() {
+    var html = groups.map(function (g) {
+      return (
+        '<div class="group-name-edit-row">' +
+        '<input class="group-name-input" data-group="' + g.id + '" value="' + esc(g.name) + '" />' +
+        '</div>'
+      );
+    }).join("");
+    document.getElementById("group-name-edit-list").innerHTML = html;
+    document.querySelectorAll("#group-name-edit-list .group-name-input").forEach(function (input) {
+      input.addEventListener("input", function (e) {
+        var groupId = e.target.getAttribute("data-group");
+        var g = groups.filter(function (x) { return x.id === groupId; })[0];
+        if (g) g.name = e.target.value;
+        scheduleAutoSave();
+      });
+    });
+  }
+
+  // ---------- グループ編成 UI ----------
+  function renderGroupBreakEditor() {
+    var allPerfs = flattenPerformances(groups);
+    var currentBreaks = getCurrentBreaks(groups);
+    var breakSet = {};
+    currentBreaks.forEach(function (b) { breakSet[b] = true; });
+
+    var html = "";
+    allPerfs.forEach(function (perf, idx) {
+      html += '<div class="group-break-perf">' + esc(perf.name) + '</div>';
+      // 最後の演目の後ろには区切りトグルを表示しない
+      if (idx < allPerfs.length - 1) {
+        var isOn = !!breakSet[idx + 1];
+        html += (
+          '<div class="group-break-toggle-row">' +
+          '<label class="group-break-toggle-label' + (isOn ? " on" : "") + '">' +
+          '<input type="checkbox" class="group-break-checkbox" data-break-index="' + (idx + 1) + '"' + (isOn ? " checked" : "") + ' />' +
+          'ここで区切る' +
+          '</label>' +
+          '</div>'
+        );
+      }
+    });
+    document.getElementById("group-break-list").innerHTML = html;
+
+    document.querySelectorAll(".group-break-checkbox").forEach(function (cb) {
+      cb.addEventListener("change", function (e) {
+        var label = e.target.closest(".group-break-toggle-label");
+        if (label) label.classList.toggle("on", e.target.checked);
+      });
+    });
+  }
+
+  function applyGroupBreaks() {
+    var breaks = [];
+    document.querySelectorAll(".group-break-checkbox").forEach(function (cb) {
+      if (cb.checked) breaks.push(parseInt(cb.getAttribute("data-break-index"), 10));
+    });
+    groups = rebuildGroupsFromBreaks(groups, breaks);
+    renderSettingsGroupNames();
+    renderGroupBreakEditor();
+    renderMain();
+    showToast("グループ編成を更新しました");
+    scheduleAutoSave();
+  }
+
+  function openSettings() {
+    document.getElementById("main-screen").classList.add("hide");
+    document.getElementById("settings-root").classList.add("show");
+    document.getElementById("confirm-box").classList.remove("show");
+    document.getElementById("reset-password-input").value = "";
+    document.getElementById("sync-url-input").value = syncUrl;
+    renderSettingsGroupNames();
+    renderGroupBreakEditor();
+  }
+
+  function closeSettings() {
+    document.getElementById("settings-root").classList.remove("show");
+    document.getElementById("main-screen").classList.remove("hide");
+    renderMain(); // グループ名変更を画面側に反映
+  }
+
+  // ---------- トースト ----------
+  var toastTimer = null;
+  function showToast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2200);
+  }
+
+  // ---------- バックアップ ----------
+  function exportBackup() {
+    var data = JSON.stringify({ version: 2, exportedAt: new Date().toISOString(), groups: groups, ceremony: ceremony, staffGroups: staffGroups, materials: materials }, null, 2);
+    var blob = new Blob([data], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var d = new Date();
+    var stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    a.href = url;
+    a.download = "おつとめ役割表_バックアップ_" + stamp + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("バックアップを保存しました");
+  }
+
+  function importBackup(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var parsed = JSON.parse(reader.result);
+        if (!parsed.groups || !Array.isArray(parsed.groups)) throw new Error("形式不正");
+        // 形式を確認してから、現在の内容を置き換える（読み込み前の内容は端末内に1世代退避する）
+        var restored = {
+          groups: migrateGroups(parsed.groups),
+          ceremony: normalizeCeremony(parsed.ceremony),
+          staffGroups: normalizeStaffGroups(parsed.staffGroups),
+          materials: normalizeMaterials(parsed.materials)
+        };
+        if (!window.confirm("現在の入力内容を、バックアップファイルの内容で置き換えます。よろしいですか？")) return;
+        stashPrev(currentSnapshot(), "バックアップ読み込み前の内容");
+        groups = restored.groups;
+        ceremony = restored.ceremony;
+        staffGroups = restored.staffGroups;
+        materials = restored.materials;
+        forceOverwriteNext = true; // 共有先も、読み込んだ内容で置き換える
+        renderSettingsGroupNames();
+        renderMain();
+        renderCeremony();
+        renderStaff();
+        renderMaterials();
+        showToast("バックアップを読み込みました");
+        scheduleAutoSave();
+      } catch (err) {
+        alert("読み込みに失敗しました。ファイル形式を確認してください。");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetAll() {
+    stashPrev(currentSnapshot(), "初期化前の内容");
+    forceOverwriteNext = true; // 共有先も初期状態で置き換える（古い内容とマージして戻らないように）
+    groups = makeDefaultGroups();
+    ceremony = makeCeremony();
+    staffGroups = makeStaffGroups();
+    materials = [];
+    renderMain();
+    renderCeremony();
+    renderStaff();
+    renderMaterials();
+    closeSettings();
+    showToast("初期状態に戻しました");
+    scheduleAutoSave();
+  }
+
+  // ---------- 印刷用（A4 横 1枚・表形式） ----------
+  // 白紙用紙（聞き取り用紙）用の列順：この配列を reverse() して使うことで
+  // 右端が「男・芯」「地方 芯」になる（元の運用のまま、変更しない）
+  var PRINT_COLUMNS = [
+    { key: "koto", label: ["琴"] },
+    { key: "shamisen", label: ["三味線"] },
+    { key: "kokyu", label: ["胡弓"] },
+    { key: "otf_m3", label: ["おてふり", "男3"], shin: false },
+    { key: "otf_m2", label: ["おてふり", "男2"], shin: false },
+    { key: "otf_m1", label: ["おてふり", "男・芯"], shin: true },
+    { key: "otf_f1", label: ["おてふり", "女・芯"], shin: true },
+    { key: "otf_f2", label: ["おてふり", "女2"], shin: false },
+    { key: "otf_f3", label: ["おてふり", "女3"], shin: false },
+    { key: "jik_j1", label: ["地方", "芯"], shin: true },
+    { key: "jik_j2", label: ["地方", "2"], shin: false },
+    { key: "kotsuzumi", label: ["小鼓"] },
+    { key: "surigane", label: ["すりがね"] },
+    { key: "taiko", label: ["太鼓"] },
+    { key: "hyoshigi", label: ["拍子木"] },
+    { key: "chanpon", label: ["ちゃんぽん"] },
+    { key: "fue", label: ["笛"] }
+  ];
+
+  // データ入り印刷（PDF/印刷ボタン）専用の列順：聞き取り用紙PDF版と同じ並び
+  // 左から　胡弓・三味線・琴・小鼓・すりがね・太鼓・拍子木・ちゃんぽん・笛・
+  //         おてふり(女3,女2,女芯,男3,男2,男芯)・地方(2,芯)
+  var PRINT_COLUMNS_FILLED = [
+    { key: "kokyu", label: ["胡弓"] },
+    { key: "shamisen", label: ["三味線"] },
+    { key: "koto", label: ["琴"] },
+    { key: "kotsuzumi", label: ["小鼓"] },
+    { key: "surigane", label: ["すりがね"] },
+    { key: "taiko", label: ["太鼓"] },
+    { key: "hyoshigi", label: ["拍子木"] },
+    { key: "chanpon", label: ["ちゃんぽん"] },
+    { key: "fue", label: ["笛"] },
+    { key: "otf_f3", label: ["おてふり", "女3"], shin: false },
+    { key: "otf_f2", label: ["おてふり", "女2"], shin: false },
+    { key: "otf_f1", label: ["おてふり", "女・芯"], shin: true },
+    { key: "otf_m3", label: ["おてふり", "男3"], shin: false },
+    { key: "otf_m2", label: ["おてふり", "男2"], shin: false },
+    { key: "otf_m1", label: ["おてふり", "男・芯"], shin: true },
+    { key: "jik_j2", label: ["地方", "2"], shin: false },
+    { key: "jik_j1", label: ["地方", "芯"], shin: true }
+  ];
+
+  function getPrintCellEntry(perf, colKey) {
+    if (colKey.indexOf("otf_") === 0) {
+      var posKey = colKey.replace("otf_", "");
+      var role = perf.roles.filter(function (r) { return r.type === "otefuri"; })[0];
+      return role ? role.people[posKey] : null;
+    }
+    if (colKey.indexOf("jik_") === 0) {
+      var posKey2 = colKey.replace("jik_", "");
+      var role2 = perf.roles.filter(function (r) { return r.type === "jikata"; })[0];
+      return role2 ? role2.people[posKey2] : null;
+    }
+    var role3 = perf.roles.filter(function (r) { return r.key === colKey; })[0];
+    return role3 ? role3.person : null;
+  }
+
+  // 左右反転（左端=笛、右端=琴）。グループ・演目列は右端。文字はすべて横書き・中央揃え。
+  function buildCeremonyStaffHtml() {
+    var ceremonyBlocks = CEREMONY_ROLE_DEFS.map(function (def) {
+      var names = ceremony[def.key]
+        .map(function (item) { return item.person && item.person.trim() ? item.person : "（未定）"; })
+        .join("　／　");
+      return (
+        '<div class="print-block">' +
+        '<div class="print-block-title">' + esc(def.label) + '</div>' +
+        '<div class="print-block-body">' + esc(names) + '</div>' +
+        '</div>'
+      );
+    }).join("");
+
+    var staffBlocks = staffGroups.map(function (s) {
+      var names = s.members
+        .map(function (item) { return item.person && item.person.trim() ? item.person : "（未定）"; })
+        .join("　／　");
+      var noteHtml = s.note && s.note.trim()
+        ? '<div class="print-block-note">備考：' + esc(s.note).split("\n").join("<br/>") + '</div>'
+        : "";
+      return (
+        '<div class="print-block">' +
+        '<div class="print-block-title">' + esc(s.label) + '</div>' +
+        '<div class="print-block-body">' + esc(names) + '</div>' +
+        noteHtml +
+        '</div>'
+      );
+    }).join("");
+
+    return (
+      '<div class="print-page-break"></div>' +
+      '<div class="print-block-wrap">' +
+      '<h1 class="print-main-title">祭儀式</h1>' +
+      '<div class="print-block-grid">' + ceremonyBlocks + '</div>' +
+      '<h1 class="print-main-title" style="margin-top:8mm;">各係員</h1>' +
+      '<div class="print-block-grid">' + staffBlocks + '</div>' +
+      '</div>'
+    );
+  }
+
+  function buildBlankPrintHtml() {
+    var cols = PRINT_COLUMNS.slice().reverse();
+
+    // ページ寸法（mm）
+    var PAGE_MARGIN_MM = 6;
+    var HEADER_AREA_MM = 16; // タイトル・日付欄・凡例
+    var WRAP_PADDING_MM = 2;
+    var HEADER_ROW_H_MM = 10;
+    var PAGE_H_MM = 210;
+    var SAFETY_MARGIN_MM = 10; // 罫線がページ下端で見切れないための安全マージン（プリンタ側の余白解釈の誤差を考慮）
+    var usableH = PAGE_H_MM - 2 * PAGE_MARGIN_MM - HEADER_AREA_MM - 2 * WRAP_PADDING_MM - SAFETY_MARGIN_MM;
+
+    // 全ページ共通の行の高さ。演目数が最も多いグループ（4演目）が用紙を目一杯使うサイズに合わせ、
+    // 演目数が少ないグループ（座りづとめ等）も同じサイズを使う（無理に広げず、かつ余らせない）。
+    var maxPerfCount = 0;
+    groups.forEach(function (g) { if (g.performances.length > maxPerfCount) maxPerfCount = g.performances.length; });
+    var COMMON_ROW_H = (usableH - HEADER_ROW_H_MM) / maxPerfCount;
+
+    function buildGroupPage(g, groupIndex) {
+      var theadCells = cols.map(function (c) {
+        return '<th class="' + (c.shin ? "shin-col" : "") + '">' + c.label.join("<br/>") + '</th>';
+      }).join("");
+      var thead = '<tr>' + theadCells + '<th class="print-col-perf">演目</th></tr>';
+
+      // 記入エリア（氏名・ふりがな）と椅子欄の高さを、mm単位の絶対値で確定させる
+      // （%指定は親要素の高さが不定だと崩れることがあるため、絶対値で確実に9:1に分ける）
+      var CHAIR_H = COMMON_ROW_H * 0.1;
+      var WRITE_AREA_H = COMMON_ROW_H - CHAIR_H;
+
+      var bodyRows = g.performances.map(function (perf) {
+        var cells = cols.map(function (c) {
+          return (
+            '<td class="' + (c.shin ? "shin-col" : "") + '">' +
+            '<div class="blank-cell">' +
+            '<div class="blank-write-area" style="height:' + WRITE_AREA_H + 'mm;">' +
+            '<div class="blank-col"></div>' +
+            '<div class="blank-col"><span class="blank-col-label blank-label-furigana">ふりがな</span></div>' +
+            '</div>' +
+            '<div class="blank-chair" style="height:' + CHAIR_H + 'mm;">椅子</div>' +
+            '</div>' +
+            '</td>'
+          );
+        }).join("");
+        return '<tr style="height:' + COMMON_ROW_H + 'mm;">' + cells + '<td class="print-col-perf">' + esc(perf.name) + '</td></tr>';
+      });
+
+      var pageBreakClass = groupIndex > 0 ? " print-page-break" : "";
+      return (
+        '<div class="print-table-wrap' + pageBreakClass + '">' +
+        '<div class="print-header-row">' +
+        '<h1 class="print-main-title">おつとめ役割　聞き取り用紙　（' + esc(g.name) + '）</h1>' +
+        '<div class="print-fill-fields">日付：<span>&nbsp;</span>　聞き取り者：<span>&nbsp;</span></div>' +
+        '</div>' +
+        '<div class="print-legend">※氏名・ふりがなは縦書きでご記入ください／椅子が必要な方は「椅子」の文字に○をつけてください</div>' +
+        '<table class="print-table"><thead>' + thead + '</thead><tbody>' + bodyRows.join("") + '</tbody></table>' +
+        '</div>'
+      );
+    }
+
+    var pagesHtml = groups.map(function (g, i) { return buildGroupPage(g, i); }).join("");
+
+    var css = [
+      '* { box-sizing: border-box; }',
+      'html, body { height: 100%; }',
+      'body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
+      '.print-table-wrap { width: 100%; height: 100%; padding: ' + WRAP_PADDING_MM + 'mm ' + WRAP_PADDING_MM + 'mm; display: flex; flex-direction: column; overflow: hidden; }',
+      '.print-header-row { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 1.5mm; flex: 0 0 auto; }',
+      '.print-main-title { font-size: 14px; margin: 0; letter-spacing: 0.08em; color: #000; font-family: "Hiragino Mincho ProN", serif; }',
+      '.print-fill-fields { font-size: 9px; color: #000; display: flex; gap: 4mm; white-space: nowrap; }',
+      '.print-fill-fields span { border-bottom: 0.5px solid #000; display: inline-block; min-width: 24mm; padding: 0 2mm 0.5mm; }',
+      '.print-legend { font-size: 8px; color: #000; margin: 0 0 1.5mm; flex: 0 0 auto; }',
+      '.print-table { width: 100%; flex: 0 0 auto; border-collapse: collapse; table-layout: fixed; }',
+      '.print-table th, .print-table td { border: 1px solid #000; padding: 0.5mm 0.8mm; text-align: center; vertical-align: middle; font-size: 9px; line-height: 1.1; word-break: keep-all; overflow-wrap: anywhere; writing-mode: horizontal-tb; }',
+      '.print-table thead th { height: ' + HEADER_ROW_H_MM + 'mm; background: #eee2d0; font-weight: 700; font-size: 8.5px; color: #000; line-height: 1.15; }',
+      '.print-col-perf { width: 9%; font-weight: 700; background: #fbf8f0; white-space: nowrap; text-align: center; vertical-align: middle; writing-mode: horizontal-tb; font-size: 9px; }',
+      '.print-table td.shin-col, .print-table th.shin-col { background: #f2e6de; font-weight: 700; }',
+      // 記入欄：氏名（右列）／ふりがな（左列）。ラベルは縦書きで各列の一番上に配置し、
+      // その下（ラベルと点線の間）が実際の記入スペースになる。
+      // write-area/chairの高さはmm単位で確定（%指定は親の高さが不定だと崩れるため使わない）。
+      '.blank-cell { display: flex; flex-direction: column; align-items: flex-end; height: 100%; padding: 0.3mm 0; }',
+      '.blank-write-area { flex: 0 0 auto; width: 90%; display: flex; flex-direction: row; }',
+      '.blank-col { flex: 1 1 50%; min-width: 0; }',
+      '.blank-col-label { writing-mode: vertical-rl; text-orientation: upright; font-size: 7px; color: #000; letter-spacing: 0.15em; display: block; width: fit-content; padding-top: 0.3mm; }',
+      '.blank-label-name { margin-left: auto; margin-right: 0.6mm; }',
+      '.blank-label-furigana { margin-left: auto; margin-right: 0; }',
+      '.blank-chair { flex: 0 0 auto; align-self: stretch; font-size: 8px; font-weight: 700; color: #000; display: flex; align-items: center; justify-content: center; border-top: 0.6px dashed #666; }',
+      '@media print { @page { size: 297mm 210mm; margin: ' + PAGE_MARGIN_MM + 'mm; } }'
+    ].join("\n");
+
+    return (
+      '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>おつとめ役割 聞き取り用紙</title><style>' + css + '</style></head>' +
+      '<body>' + pagesHtml + '</body></html>'
+    );
+  }
+
+  function buildPrintHtml() {
+    var cols = PRINT_COLUMNS_FILLED.slice();
+
+    var theadCells = cols.map(function (c) {
+      return '<th class="' + (c.shin ? "shin-col" : "") + '">' + c.label.join("<br/>") + '</th>';
+    }).join("");
+    var thead = '<tr>' + theadCells + '<th class="print-col-perf">演目</th><th class="print-col-group">グループ</th></tr>';
+
+    // 列幅(mm)から、氏名の文字数に応じたフォントサイズを動的に計算する。
+    // 短い名前はできるだけ大きく、6文字までは極力そのまま表示できるサイズを確保する。
+    var PAGE_W_MM = 297;
+    var SIDE_MARGIN_MM = 6;
+    var PERF_COL_PCT = 0.065;
+    var GROUP_COL_PCT = 0.03; // グループ列は縦書きのため幅は最小限でよい
+    var usableW = PAGE_W_MM - 2 * SIDE_MARGIN_MM;
+    var dataColW = usableW * (1 - PERF_COL_PCT - GROUP_COL_PCT) / cols.length;
+    var CELL_H_PADDING_MM = 0.6;
+    var MAX_NAME_FONT_PX = 11;
+    var MIN_NAME_FONT_PX = 6.5;
+    var MAX_FURIGANA_FONT_PX = 6;
+    var MIN_FURIGANA_FONT_PX = 5; // これ未満には縮めない。収まらない分は2行に折り返す（省略しない）
+
+    function computeFontSize(text, maxFs, minFs) {
+      var len = Math.max(text.length, 1);
+      var availableMm = dataColW - CELL_H_PADDING_MM;
+      var fsFromWidth = availableMm / len / 0.3528;
+      var fs = Math.min(maxFs, fsFromWidth);
+      if (fs < minFs) fs = minFs; // これ未満は縮めず、収まらない分は折り返す
+      return fs;
+    }
+
+    // 最小サイズでも1行に収まらない文字列は、省略せず折り返して全文を表示する
+    function needsWrap(text, fs) {
+      var availableMm = dataColW - CELL_H_PADDING_MM;
+      return text.length * fs * 0.3528 > availableMm;
+    }
+
+    function cellContent(entry) {
+      if (!entry) return "";
+      var chairBadge = entry.chair ? '<span class="p-chair">椅子</span>' : "";
+      var nameFs = entry.name ? computeFontSize(entry.name, MAX_NAME_FONT_PX, MIN_NAME_FONT_PX) : MAX_NAME_FONT_PX;
+      var nameWrap = entry.name && needsWrap(entry.name, nameFs) ? " wrap" : "";
+      var name = entry.name ? '<span class="p-name' + nameWrap + '" style="font-size:' + nameFs + 'px;">' + esc(entry.name) + '</span>' : "";
+      var furiganaFs = entry.furigana ? computeFontSize(entry.furigana, MAX_FURIGANA_FONT_PX, MIN_FURIGANA_FONT_PX) : MAX_FURIGANA_FONT_PX;
+      var furiganaWrap = entry.furigana && needsWrap(entry.furigana, furiganaFs) ? " wrap" : "";
+      var furigana = entry.furigana ? '<span class="p-furigana' + furiganaWrap + '" style="font-size:' + furiganaFs + 'px;">' + esc(entry.furigana) + '</span>' : "";
+      if (!name && !furigana && !chairBadge) return "";
+      return '<div class="p-cell">' + furigana + name + chairBadge + '</div>';
+    }
+
+    // 総演目数（行数）を数え、A4横1枚の高さいっぱいに均等配分する
+    var totalPerfCount = 0;
+    groups.forEach(function (g) { totalPerfCount += g.performances.length; });
+
+    // ページ寸法（мм）。@page marginを詰め、タイトル分を差し引いた残りを表の高さとする。
+    var PAGE_H_MM = 210;
+    var PAGE_MARGIN_MM = 6;
+    var TITLE_H_MM = 7;
+    var WRAP_PADDING_MM = 2;
+    var HEADER_ROW_H_MM = 9;
+    var usableH = PAGE_H_MM - 2 * PAGE_MARGIN_MM - TITLE_H_MM - 2 * WRAP_PADDING_MM;
+    var bodyRowH = (usableH - HEADER_ROW_H_MM) / totalPerfCount;
+    if (bodyRowH < 10) bodyRowH = 10; // 最低限の読みやすさを確保する下限
+
+    var bodyRows = [];
+    groups.forEach(function (g) {
+      g.performances.forEach(function (perf, pi) {
+        var cells = cols.map(function (c) {
+          var entry = getPrintCellEntry(perf, c.key);
+          return '<td class="' + (c.shin ? "shin-col" : "") + '">' + cellContent(entry) + '</td>';
+        }).join("");
+        var groupCell = pi === 0 ? '<td class="print-col-group" rowspan="' + g.performances.length + '">' + esc(g.name) + '</td>' : "";
+        bodyRows.push('<tr style="height:' + bodyRowH + 'mm;">' + cells + '<td class="print-col-perf">' + esc(perf.name) + '</td>' + groupCell + '</tr>');
+      });
+    });
+
+    var css = [
+      '* { box-sizing: border-box; }',
+      'html, body { height: 100%; }',
+      'body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
+      '.print-table-wrap { width: 100%; height: 100%; padding: ' + WRAP_PADDING_MM + 'mm ' + WRAP_PADDING_MM + 'mm; display: flex; flex-direction: column; overflow: hidden; }',
+      '.print-main-title { font-size: 16px; text-align: center; margin: 0 0 2mm; letter-spacing: 0.12em; color: #000; font-family: "Hiragino Mincho ProN", serif; flex: 0 0 auto; }',
+      '.print-table { width: 100%; flex: 1 1 auto; border-collapse: collapse; table-layout: fixed; }',
+      '.print-table th, .print-table td { border: 1px solid #000; padding: 0.4mm 0.6mm; text-align: center; vertical-align: middle; font-size: 9px; line-height: 1.1; word-break: keep-all; overflow-wrap: anywhere; writing-mode: horizontal-tb; }',
+      '.print-table thead th { height: ' + HEADER_ROW_H_MM + 'mm; background: #eee2d0; font-weight: 700; font-size: 8.5px; color: #000; line-height: 1.15; }',
+      // グループ列は縦書き表示（幅は最小限。縦書きのため文字幅ぶんで足りる）
+      '.print-col-group { width: 3%; font-weight: 700; background: #f7f1e6; letter-spacing: 0.05em; text-align: center; vertical-align: middle; font-size: 8px; white-space: normal; writing-mode: vertical-rl; text-orientation: upright; }',
+      '.print-col-perf { width: 6.5%; font-weight: 700; background: #fbf8f0; white-space: nowrap; text-align: center; vertical-align: middle; writing-mode: horizontal-tb; font-size: 8px; overflow: hidden; text-overflow: ellipsis; }',
+      // 芯セルのみ色分け（行の縞模様は廃止：芯の色分けと重複して見づらいため）
+      '.print-table td.shin-col, .print-table th.shin-col { background: #f2e6de; font-weight: 700; }',
+      // セル内の氏名・ふりがな・椅子表示（行の高さが内容で広がらないよう、フォントサイズは列幅基準で固定・line-heightも詰める）
+      '.p-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3mm; height: 100%; overflow: hidden; }',
+      '.p-furigana { font-size: 6px; line-height: 1.05; color: #000; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.2px; }',
+      '.p-name { font-size: 9px; line-height: 1.05; font-weight: 700; color: #000; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.2px; }',
+      '.p-name.wrap, .p-furigana.wrap { white-space: normal; word-break: break-all; overflow: visible; text-overflow: clip; text-align: center; letter-spacing: 0; }',
+      '.p-chair { font-size: 5.5px; line-height: 1; color: #fff; background: #b5482e; border-radius: 5px; padding: 0.2mm 1.2mm; }',
+      // 祭儀式・各係員ページ用
+      '.print-page-break { page-break-before: always; }',
+      // 備考が長くてもページ下で切れないよう、高さ固定・はみ出し非表示にせず、必要なら次ページへ自然に送る
+      '.print-block-wrap { width: 100%; padding: ' + WRAP_PADDING_MM + 'mm; }',
+      '.print-block-wrap .print-main-title { break-after: avoid; page-break-after: avoid; }',
+      '.print-block-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; align-items: stretch; }',
+      '.print-block { border: 0.6px solid #666; border-radius: 1mm; padding: 3mm; break-inside: avoid; page-break-inside: avoid; min-width: 0; overflow-wrap: anywhere; }',
+      '.print-block-title { font-size: 11px; font-weight: 700; color: #000; background: #eee2d0; margin: -3mm -3mm 2mm; padding: 1.5mm 3mm; }',
+      '.print-block-body { font-size: 11px; color: #000; line-height: 1.5; min-height: 5mm; }',
+      '.print-block-note { font-size: 9px; color: #333; margin-top: 2mm; padding-top: 2mm; border-top: 0.4px dashed #999; white-space: normal; }',
+      '@media print { @page { size: 297mm 210mm; margin: ' + PAGE_MARGIN_MM + 'mm; } }'
+    ].join("\n");
+
+    return (
+      '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title>おつとめ役割表</title><style>' + css + '</style></head>' +
+      '<body><div class="print-table-wrap"><h1 class="print-main-title">おつとめ役割表</h1>' +
+      '<table class="print-table"><thead>' + thead + '</thead><tbody>' + bodyRows.join("") + '</tbody></table></div>' +
+      buildCeremonyStaffHtml() +
+      '</body></html>'
+    );
+  }
+
+  function openPrintWindow(html) {
+    var w = window.open("", "_blank");
+    if (!w) {
+      alert("印刷用画面を開けませんでした。\nブラウザのポップアップブロックを許可してから、もう一度お試しください。");
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    // iOSでは描画完了直後に呼ぶと空白になることがあるため、少し待ってから呼ぶ
+    setTimeout(function () {
+      w.focus();
+      w.print();
+    }, 300);
+  }
+
+  function handlePrint() {
+    openPrintWindow(buildPrintHtml());
+  }
+
+  function handleBlankPrint() {
+    openPrintWindow(buildBlankPrintHtml());
+  }
+
+  // ---------- イベント登録 ----------
+  document.getElementById("print-btn").addEventListener("click", handlePrint);
+  document.getElementById("print-blank-btn").addEventListener("click", handleBlankPrint);
+  document.getElementById("settings-open-btn").addEventListener("click", openSettings);
+  document.getElementById("settings-close-btn").addEventListener("click", closeSettings);
+  document.getElementById("sync-url-save-btn").addEventListener("click", function () {
+    var val = document.getElementById("sync-url-input").value.trim();
+    if (!val) {
+      alert("接続先のURLを入力してください。");
+      return;
+    }
+    syncUrl = val;
+    localStorage.setItem(SYNC_URL_KEY, syncUrl);
+    showToast("接続先を保存しました");
+    loadFromServer(true);
+  });
+  document.getElementById("sync-fetch-btn").addEventListener("click", function () {
+    if (!syncUrl) {
+      alert("先に接続先を保存してください。");
+      return;
+    }
+    loadFromServer(true);
+  });
+  document.getElementById("sync-url-clear-btn").addEventListener("click", function () {
+    if (!confirm("オンライン共有の接続を解除しますか？（共有先に保存済みのデータは消えません）")) return;
+    syncUrl = "";
+    // 空文字を明示的に保存し、「解除した」という状態を次回起動時にも保持する
+    // （removeItemだと、埋め込みの共有先URLに自動で戻ってしまうため）
+    localStorage.setItem(SYNC_URL_KEY, "");
+    document.getElementById("sync-url-input").value = "";
+    setSyncStatus("", "保存済み（この端末のみ）");
+    showToast("接続を解除しました");
+  });
+  document.getElementById("group-break-apply-btn").addEventListener("click", applyGroupBreaks);
+  document.getElementById("export-btn").addEventListener("click", exportBackup);
+  document.getElementById("import-btn").addEventListener("click", function () {
+    document.getElementById("import-file-input").click();
+  });
+  document.getElementById("import-file-input").addEventListener("change", function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (file) importBackup(file);
+    e.target.value = "";
+  });
+  document.getElementById("reset-open-btn").addEventListener("click", function () {
+    document.getElementById("confirm-box").classList.add("show");
+  });
+  document.getElementById("reset-cancel-btn").addEventListener("click", function () {
+    document.getElementById("confirm-box").classList.remove("show");
+    document.getElementById("reset-password-input").value = "";
+  });
+  var RESET_PASSWORD = "0000";
+  document.getElementById("reset-confirm-btn").addEventListener("click", function () {
+    var pwInput = document.getElementById("reset-password-input");
+    if (pwInput.value !== RESET_PASSWORD) {
+      alert("パスワードが正しくありません。");
+      return;
+    }
+    pwInput.value = "";
+    resetAll();
+  });
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      switchTab(btn.getAttribute("data-tab"));
+    });
+  });
+  document.getElementById("materials-add-btn").addEventListener("click", handleMaterialAdd);
+  document.getElementById("files-add-btn").addEventListener("click", function () {
+    document.getElementById("files-input").click();
+  });
+  document.getElementById("files-input").addEventListener("change", function (e) {
+    handleFilesSelected(e.target.files);
+    e.target.value = "";
+  });
+
+  // ---------- 初期描画 ----------
+  // 1. まずローカルの内容を同期的に読み込む（通信は行わない）
+  loadFromStorage();
+  // 2. 画面の中身を表示する（ここまでは file:// で開いた場合でも確実に動く）
+  renderMain();
+  renderCeremony();
+  renderStaff();
+  renderMaterials();
+  // 3. 最後に、うまくいけばオンライン共有を試みる（失敗しても画面表示には影響しない）
+  trySyncWithServer();
+  // 4. ページを閉じる・隠す直前に、保留中の入力を端末内へ即時保存する
+  window.addEventListener("pagehide", flushLocalNow);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") flushLocalNow();
+  });
+})();
+</script>
+
+</body>
+</html>
