@@ -829,6 +829,17 @@
     try { localStorage.setItem(BASE_KEY, str); } catch (err) {}
   }
 
+  // 共有先が資料リンクを保存する版であることを、一度でも確認したか。
+  // 確認前に記録した「最後に一致した内容」の資料リンクは、実際には共有先に届いていなかったため、
+  // 共有先が対応した直後に「共有先で全部消された」と誤解して端末のリンクを消さないよう、基準としては無視する。
+  var MATERIALS_SEEN_KEY = "tenrikyo_materials_supported_v1";
+  function materialsSupportKnown() {
+    try { return localStorage.getItem(MATERIALS_SEEN_KEY) === "1"; } catch (err) { return false; }
+  }
+  function markMaterialsSupported() {
+    try { localStorage.setItem(MATERIALS_SEEN_KEY, "1"); } catch (err) {}
+  }
+
   // 上書きされる側の内容を、念のため端末内に1世代だけ退避する
   function stashPrev(snapshot, reason) {
     try {
@@ -971,6 +982,8 @@
         }
         var server = normalizeSnapshot(data);
         var local = currentSnapshot();
+        var supportWasKnown = materialsSupportKnown();
+        if (Array.isArray(data.materials)) markMaterialsSupported();
         // 共有先（GAS）が資料リンクを保存していない場合は、この端末の資料リンクを消さずに残す
         materialsUnsupported = false;
         if (data.materials === undefined) {
@@ -985,6 +998,9 @@
           return;
         }
         var base = loadBase();
+        // 共有先が資料リンクに対応したことを初めて確認した場合、それ以前の基準の資料リンクは無視する
+        // （端末に残っているリンクは「この端末で追加したもの」として共有先へ送られる）
+        if (base && !supportWasKnown && Array.isArray(data.materials)) base.materials = [];
         var merged;
         if (base) {
           merged = mergeSnapshots(base, local, server);
