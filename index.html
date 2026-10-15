@@ -238,6 +238,21 @@
   .main-screen { display: block; }
   .main-screen.hide { display: none; }
 
+  /* ===== スマホ向け（画面幅600px以下）。PCの表示には影響しない ===== */
+  @media (max-width: 600px) {
+    /* タブは4つを画面幅に均等に収める（横にはみ出させない） */
+    .tab-bar { padding-left: 0; gap: 2px; }
+    .tab-btn { min-width: 0; flex: 1 1 0; padding: 8px 2px; font-size: 13px; }
+    /* 上部ボタンは文字を折り返さず、入りきらなければ次の行へ回す */
+    .actions { flex-wrap: wrap; width: 100%; }
+    .actions .btn { flex: 1 1 auto; justify-content: center; white-space: nowrap; padding: 10px 8px; font-size: 13px; }
+    /* 入力欄が16px未満だと、iPhoneでは入力のたびに画面が自動拡大されるため16pxにそろえる */
+    .app-root input, .app-root textarea, .app-root select { font-size: 16px !important; }
+    .app-root input::placeholder, .app-root textarea::placeholder { font-size: 13px; } /* 入力例だけ小さくして、狭い欄で切れないようにする */
+    .chair-toggle-btn { font-size: 12px; padding: 7px 8px; }
+    .perf-card, .staff-card, .ceremony-block { min-width: 0; }
+  }
+
   @media print {
     .toolbar, .toast { display: none !important; }
   }
